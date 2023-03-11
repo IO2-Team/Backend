@@ -1,9 +1,13 @@
+using dionizos_backend_app.Models;
+using Microsoft.EntityFrameworkCore;
+
 namespace dionizos_backend_app
 {
     public class Program
     {
         public static void Main(string[] args)
         {
+            Prelaunch.GetSecrets();
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -12,7 +16,8 @@ namespace dionizos_backend_app
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+            builder.Services.AddDbContext<DionizosDataContext>(options => options.UseNpgsql());
+            //Environment.GetEnvironmentVariable("POSTGRES_CONNSTRING"))
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
