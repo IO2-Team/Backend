@@ -1,5 +1,7 @@
 using dionizos_backend_app.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 
 namespace dionizos_backend_app
 {
@@ -18,6 +20,20 @@ namespace dionizos_backend_app
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<DionizosDataContext>(options => options.UseNpgsql());
             //Environment.GetEnvironmentVariable("POSTGRES_CONNSTRING"))
+
+            builder.Services
+                .AddMvc(options =>
+                {
+                    options.InputFormatters.RemoveType<Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonInputFormatter>();
+                    options.OutputFormatters.RemoveType<Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonOutputFormatter>();
+                })
+                .AddNewtonsoftJson(opts =>
+                {
+                    opts.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    opts.SerializerSettings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
+                })
+                .AddXmlSerializerFormatters();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
