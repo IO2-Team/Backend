@@ -34,6 +34,16 @@ namespace dionizos_backend_app
                 })
                 .AddXmlSerializerFormatters();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: "GH Pages",
+                                  builder =>
+                                  {
+                                      builder.WithOrigins("https://io2-team.github.io/",
+                                                          "https://io2-team.github.io/Frontend");
+                                  });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -47,6 +57,7 @@ namespace dionizos_backend_app
 
             app.UseAuthorization();
 
+            app.UseCors();
 
             app.MapControllers();
 
