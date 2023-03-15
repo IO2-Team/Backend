@@ -17,7 +17,7 @@ namespace Org.OpenAPITools.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class Category : IEquatable<Category>
+    public partial class CategoryDTO : IEquatable<CategoryDTO>
     {
         /// <summary>
         /// Gets or Sets Id
@@ -38,7 +38,7 @@ namespace Org.OpenAPITools.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class Category {\n");
+            sb.Append("class CategoryDTO {\n");
             sb.Append("  Id: ").Append(Id).Append("\n");
             sb.Append("  Name: ").Append(Name).Append("\n");
             sb.Append("}\n");
@@ -63,15 +63,15 @@ namespace Org.OpenAPITools.Models
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((Category)obj);
+            return obj.GetType() == GetType() && Equals((CategoryDTO)obj);
         }
 
         /// <summary>
-        /// Returns true if Category instances are equal
+        /// Returns true if CategoryDTO instances are equal
         /// </summary>
-        /// <param name="other">Instance of Category to be compared</param>
+        /// <param name="other">Instance of CategoryDTO to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(Category other)
+        public bool Equals(CategoryDTO other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -110,12 +110,12 @@ namespace Org.OpenAPITools.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(Category left, Category right)
+        public static bool operator ==(CategoryDTO left, CategoryDTO right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(Category left, Category right)
+        public static bool operator !=(CategoryDTO left, CategoryDTO right)
         {
             return !Equals(left, right);
         }

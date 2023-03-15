@@ -24,7 +24,7 @@ namespace Org.OpenAPITools.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class LoginOrganizer200Response : IEquatable<LoginOrganizer200Response>
+    public partial class LoginOrganizer200ResponseDTO : IEquatable<LoginOrganizer200ResponseDTO>
     {
         /// <summary>
         /// The session token.
@@ -40,7 +40,7 @@ namespace Org.OpenAPITools.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class LoginOrganizer200Response {\n");
+            sb.Append("class LoginOrganizer200ResponseDTO {\n");
             sb.Append("  SessionToken: ").Append(SessionToken).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -64,15 +64,15 @@ namespace Org.OpenAPITools.Models
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((LoginOrganizer200Response)obj);
+            return obj.GetType() == GetType() && Equals((LoginOrganizer200ResponseDTO)obj);
         }
 
         /// <summary>
-        /// Returns true if LoginOrganizer200Response instances are equal
+        /// Returns true if LoginOrganizer200ResponseDTO instances are equal
         /// </summary>
-        /// <param name="other">Instance of LoginOrganizer200Response to be compared</param>
+        /// <param name="other">Instance of LoginOrganizer200ResponseDTO to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(LoginOrganizer200Response other)
+        public bool Equals(LoginOrganizer200ResponseDTO other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -104,12 +104,12 @@ namespace Org.OpenAPITools.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(LoginOrganizer200Response left, LoginOrganizer200Response right)
+        public static bool operator ==(LoginOrganizer200ResponseDTO left, LoginOrganizer200ResponseDTO right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(LoginOrganizer200Response left, LoginOrganizer200Response right)
+        public static bool operator !=(LoginOrganizer200ResponseDTO left, LoginOrganizer200ResponseDTO right)
         {
             return !Equals(left, right);
         }
