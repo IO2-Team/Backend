@@ -166,12 +166,10 @@ namespace Org.OpenAPITools.Controllers
         [Route("/organizer")]
         public virtual async Task<IActionResult> SignUp([FromQuery (Name = "name")][Required()]string name, [FromQuery (Name = "email")][Required()]string email, [FromQuery (Name = "password")][Required()]string password)
         {
-            int nameHash = name.GetHashCode();
-
             // Check if organizer with that name or email already exists
             Organizer? organizerInDb =
                 await _context.Organizers
-                              .FirstOrDefaultAsync(x => x.Name == nameHash || x.Email == email);
+                              .FirstOrDefaultAsync(x => x.Name == name || x.Email == email);
             if (organizerInDb != null)
             {
                 // return bad request and no body
@@ -189,7 +187,7 @@ namespace Org.OpenAPITools.Controllers
             {
                 Id = organizerId,
                 Email = email,
-                Name = nameHash,
+                Name = name,
                 Password = password,
                 Status = (int)Organizer.StatusEnum.PendingEnum,
             };
