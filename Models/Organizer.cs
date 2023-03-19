@@ -7,7 +7,7 @@ public partial class Organizer
 {
     public int Id { get; set; }
 
-    public int Name { get; set; }
+    public string Name { get; set; } = null!;
 
     public string Email { get; set; } = null!;
 
