@@ -43,14 +43,15 @@ namespace Org.OpenAPITools.Controllers
         public virtual async Task<IActionResult> Confirm([FromRoute (Name = "id")][Required]string id, [FromQuery (Name = "code")][Required()]string code)
         {
             int Id = int.Parse(id);
-            // TODO: (kutakw) email verification
+            // TODO: (kutakw) email verification, currently id is enough
             Emailcode? entity = await _context.Emailcodes
-                                            .FirstOrDefaultAsync(x => x.OrganizerId == Id);
+                                            .FirstOrDefaultAsync(x => x.OrganizerId == Id
+                                                && (true || x.Code == code));
 
             // verify id and code
             if(entity == null)
             {
-                // wrong code, return bad request
+                // wrong email/code, return bad request
                 return StatusCode(400);
             }
 
@@ -98,8 +99,6 @@ namespace Org.OpenAPITools.Controllers
         [Route("/organizer/login")]
         public virtual async Task<IActionResult> LoginOrganizer([FromQuery (Name = "email")][Required()]string email, [FromQuery (Name = "password")][Required()]string password)
         {
-            throw new NotImplementedException();
-
             // Check if organizer exists
             Organizer? organizer = await _context.Organizers
                                                  .FirstOrDefaultAsync(
@@ -112,7 +111,6 @@ namespace Org.OpenAPITools.Controllers
                 return StatusCode(400);
             }
 
-            // TODO: (kutakw) 2hrs is enough i guess
             DateTime time = DateTime.Now.AddHours(2.0);
 
             // Create new session with token
@@ -120,8 +118,7 @@ namespace Org.OpenAPITools.Controllers
             {
                 OrganizerId = organizer.Id,
                 Time = time,
-                // TODO: (kutakw) tbd
-                Token = (email + time).Base64Encode(),
+                Token = Session.GetToken(email, time),
             };
 
             // update db
@@ -176,16 +173,10 @@ namespace Org.OpenAPITools.Controllers
                 return StatusCode(400);
             }
 
-            // FIXME: (kutakw) ?
-            int organizerId = await _context.Organizers.AnyAsync()
-                ? (await _context.Organizers
-                           .Select(x => x.Id)
-                           .MaxAsync()) + 1
-                : 1;
             // Create new organizer
             Organizer organizer = new()
             {
-                Id = organizerId,
+                //Id = organizerId,
                 Email = email,
                 Name = name,
                 Password = password,
@@ -195,16 +186,10 @@ namespace Org.OpenAPITools.Controllers
             await _context.Organizers.AddAsync(organizer);
             await _context.SaveChangesAsync();
 
-            // FIXME: (kutakw) ?
-            int emailcodeId = await _context.Emailcodes.AnyAsync()
-                ? (await _context.Emailcodes
-                           .Select(x => x.Id)
-                           .MaxAsync()) + 1
-                : 1;
             // Create Email Code
             Emailcode emailcode = new()
             {
-                Id = emailcodeId,
+                //Id = emailcodeId,
                 OrganizerId = organizer.Id,
                 Time = DateTime.Now.AddDays(1.0),
 

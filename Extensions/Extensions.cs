@@ -7,15 +7,14 @@ namespace dionizos_backend_app.Extensions
 {
     internal static class Extensions
     {
-        // FIXME: (kutakw) make these extensions async
+        // FIXME: (kutakw) maybe make these extensions async
         public static OrganizerDTO AsDto(this Organizer organizer, DionizosDataContext context)
         {
             return new OrganizerDTO()
             {
                 Id = organizer.Id,
                 Email = organizer.Email,
-                // FIXME: (kutakw) currently in db we got int as organizers name
-                Name = "FIXME",
+                Name = organizer.Name,
                 Password = organizer.Password,
                 Status = (OrganizerDTO.StatusEnum)organizer.Status,
                 Events = context.Events
@@ -32,8 +31,8 @@ namespace dionizos_backend_app.Extensions
             {
                 Id = ev.Id,
 
-                // FIXME: (kutakw) where do we keep currently available places
-                FreePlace = ev.Placecapacity - 0,
+                // FIXME: (kutakw) where do we keep currently available places?
+                FreePlace = ev.Placecapacity,
 
                 Title = ev.Title,
                 StartTime = ((DateTimeOffset)ev.Starttime).ToUnixTimeSeconds(),
@@ -42,8 +41,9 @@ namespace dionizos_backend_app.Extensions
                 // FIXME: (kutakw) currently in db we got int as events name
                 Name = "FIXME",
 
-                // FIXME: (kutakw) placeSchema not functioning yet
+                // FIXME: (kutakw) placeSchema not functioning yet + i dont think it outta be int
                 PlaceSchema = ev.Placeschema.ToString() ?? "",
+
                 Status = (EventStatus)ev.Status,
                 Categories = context.Eventincategories
                                     .Include(x => x.Categories)
