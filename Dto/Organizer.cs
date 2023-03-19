@@ -54,7 +54,7 @@ namespace Org.OpenAPITools.Models
         /// Gets or Sets Events
         /// </summary>
         [DataMember(Name="events", EmitDefaultValue=false)]
-        public List<Event> Events { get; set; }
+        public List<EventDTO> Events { get; set; }
 
 
         /// <summary>

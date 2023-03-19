@@ -47,8 +47,8 @@ namespace Org.OpenAPITools.Controllers
             exampleJson = "{\r\n  \"name\" : \"Long description of Event\",\r\n  \"freePlace\" : 2,\r\n  \"startTime\" : 1673034164,\r\n  \"id\" : 10,\r\n  \"endTime\" : 1683034164,\r\n  \"categories\" : [ {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  }, {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  } ],\r\n  \"title\" : \"Short description of Event\",\r\n  \"placeSchema\" : \"Seralized place schema\",\r\n  \"status\" : \"done\"\r\n}";
             
             var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<Event>(exampleJson)
-            : default(Event);
+            ? JsonConvert.DeserializeObject<EventDTO>(exampleJson)
+            : default(EventDTO);
             //TODO: Change the data returned
             return new ObjectResult(example);
         }
@@ -92,8 +92,8 @@ namespace Org.OpenAPITools.Controllers
             exampleJson = "[ {\r\n  \"name\" : \"Long description of Event\",\r\n  \"freePlace\" : 2,\r\n  \"startTime\" : 1673034164,\r\n  \"id\" : 10,\r\n  \"endTime\" : 1683034164,\r\n  \"categories\" : [ {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  }, {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  } ],\r\n  \"title\" : \"Short description of Event\",\r\n  \"placeSchema\" : \"Seralized place schema\",\r\n  \"status\" : \"done\"\r\n}, {\r\n  \"name\" : \"Long description of Event\",\r\n  \"freePlace\" : 2,\r\n  \"startTime\" : 1673034164,\r\n  \"id\" : 10,\r\n  \"endTime\" : 1683034164,\r\n  \"categories\" : [ {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  }, {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  } ],\r\n  \"title\" : \"Short description of Event\",\r\n  \"placeSchema\" : \"Seralized place schema\",\r\n  \"status\" : \"done\"\r\n} ]";
             
             var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Event>>(exampleJson)
-            : default(List<Event>);
+            ? JsonConvert.DeserializeObject<List<EventDTO>>(exampleJson)
+            : default(List<EventDTO>);
             //TODO: Change the data returned
             return new ObjectResult(example);
         }
@@ -121,8 +121,8 @@ namespace Org.OpenAPITools.Controllers
             exampleJson = "{\r\n  \"name\" : \"Long description of Event\",\r\n  \"freePlace\" : 2,\r\n  \"startTime\" : 1673034164,\r\n  \"id\" : 10,\r\n  \"endTime\" : 1683034164,\r\n  \"categories\" : [ {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  }, {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  } ],\r\n  \"title\" : \"Short description of Event\",\r\n  \"placeSchema\" : \"Seralized place schema\",\r\n  \"status\" : \"done\"\r\n}";
             
             var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<Event>(exampleJson)
-            : default(Event);
+            ? JsonConvert.DeserializeObject<EventDTO>(exampleJson)
+            : default(EventDTO);
             //TODO: Change the data returned
             return new ObjectResult(example);
         }
@@ -142,8 +142,8 @@ namespace Org.OpenAPITools.Controllers
             exampleJson = "[ {\r\n  \"name\" : \"Long description of Event\",\r\n  \"freePlace\" : 2,\r\n  \"startTime\" : 1673034164,\r\n  \"id\" : 10,\r\n  \"endTime\" : 1683034164,\r\n  \"categories\" : [ {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  }, {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  } ],\r\n  \"title\" : \"Short description of Event\",\r\n  \"placeSchema\" : \"Seralized place schema\",\r\n  \"status\" : \"done\"\r\n}, {\r\n  \"name\" : \"Long description of Event\",\r\n  \"freePlace\" : 2,\r\n  \"startTime\" : 1673034164,\r\n  \"id\" : 10,\r\n  \"endTime\" : 1683034164,\r\n  \"categories\" : [ {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  }, {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  } ],\r\n  \"title\" : \"Short description of Event\",\r\n  \"placeSchema\" : \"Seralized place schema\",\r\n  \"status\" : \"done\"\r\n} ]";
             
             var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Event>>(exampleJson)
-            : default(List<Event>);
+            ? JsonConvert.DeserializeObject<List<EventDTO>>(exampleJson)
+            : default(List<EventDTO>);
             //TODO: Change the data returned
             return new ObjectResult(example);
         }
@@ -164,8 +164,8 @@ namespace Org.OpenAPITools.Controllers
             exampleJson = "[ {\r\n  \"name\" : \"Long description of Event\",\r\n  \"freePlace\" : 2,\r\n  \"startTime\" : 1673034164,\r\n  \"id\" : 10,\r\n  \"endTime\" : 1683034164,\r\n  \"categories\" : [ {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  }, {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  } ],\r\n  \"title\" : \"Short description of Event\",\r\n  \"placeSchema\" : \"Seralized place schema\",\r\n  \"status\" : \"done\"\r\n}, {\r\n  \"name\" : \"Long description of Event\",\r\n  \"freePlace\" : 2,\r\n  \"startTime\" : 1673034164,\r\n  \"id\" : 10,\r\n  \"endTime\" : 1683034164,\r\n  \"categories\" : [ {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  }, {\r\n    \"name\" : \"Sport\",\r\n    \"id\" : 1\r\n  } ],\r\n  \"title\" : \"Short description of Event\",\r\n  \"placeSchema\" : \"Seralized place schema\",\r\n  \"status\" : \"done\"\r\n} ]";
             
             var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Event>>(exampleJson)
-            : default(List<Event>);
+            ? JsonConvert.DeserializeObject<List<EventDTO>>(exampleJson)
+            : default(List<EventDTO>);
             //TODO: Change the data returned
             return new ObjectResult(example);
         }
@@ -181,7 +181,7 @@ namespace Org.OpenAPITools.Controllers
         [HttpPatch]
         [Route("/events/{id}")]
         [Consumes("application/json")]
-        public virtual IActionResult PatchEvent([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id, [FromBody]Event _event)
+        public virtual IActionResult PatchEvent([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id, [FromBody]EventDTO _event)
         {
 
             //TODO: Uncomment the next line to return response 202 or use other options such as return this.NotFound(), return this.BadRequest(..), ...

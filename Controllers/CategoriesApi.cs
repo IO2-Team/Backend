@@ -40,8 +40,8 @@ namespace Org.OpenAPITools.Controllers
             exampleJson = "{\r\n  \"name\" : \"Sport\",\r\n  \"id\" : 1\r\n}";
             
             var example = exampleJson != null
-            ? Newtonsoft.Json.JsonConvert.DeserializeObject<Category>(exampleJson)
-            : default(Category);
+            ? Newtonsoft.Json.JsonConvert.DeserializeObject<CategoryDTO>(exampleJson)
+            : default(CategoryDTO);
             //TODO: Change the data returned
             return new ObjectResult(example);
         }
@@ -61,8 +61,8 @@ namespace Org.OpenAPITools.Controllers
             exampleJson = "[ {\r\n  \"name\" : \"Sport\",\r\n  \"id\" : 1\r\n}, {\r\n  \"name\" : \"Sport\",\r\n  \"id\" : 1\r\n} ]";
             
             var example = exampleJson != null
-            ? Newtonsoft.Json.JsonConvert.DeserializeObject<List<Category>>(exampleJson)
-            : default(List<Category>);
+            ? Newtonsoft.Json.JsonConvert.DeserializeObject<List<CategoryDTO>>(exampleJson)
+            : default(List<CategoryDTO>);
             //TODO: Change the data returned
             return new ObjectResult(example);
         }
