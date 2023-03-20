@@ -14,6 +14,7 @@ public partial class DionizosDataContext : DbContext
         : base(options)
     {
     }
+
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Emailcode> Emailcodes { get; set; }
@@ -29,6 +30,7 @@ public partial class DionizosDataContext : DbContext
     public virtual DbSet<Session> Sessions { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseNpgsql(System.Environment.GetEnvironmentVariable("POSTGRES_CONNSTRING_TSC"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -39,9 +41,7 @@ public partial class DionizosDataContext : DbContext
 
             entity.ToTable("categories");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasMaxLength(250)
                 .HasColumnName("name");
@@ -53,9 +53,7 @@ public partial class DionizosDataContext : DbContext
 
             entity.ToTable("emailcodes");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Code)
                 .HasMaxLength(255)
                 .HasColumnName("code");
@@ -76,9 +74,7 @@ public partial class DionizosDataContext : DbContext
 
             entity.ToTable("events");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Categories).HasColumnName("categories");
             entity.Property(e => e.Endtime)
                 .HasColumnType("timestamp without time zone")
@@ -107,9 +103,7 @@ public partial class DionizosDataContext : DbContext
 
             entity.ToTable("eventincategories");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CategoriesId).HasColumnName("categories_id");
             entity.Property(e => e.EventId).HasColumnName("event_id");
 
@@ -130,13 +124,13 @@ public partial class DionizosDataContext : DbContext
 
             entity.ToTable("organizers");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Email)
                 .HasMaxLength(320)
                 .HasColumnName("email");
-            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.Name)
+                .HasMaxLength(320)
+                .HasColumnName("name");
             entity.Property(e => e.Password).HasColumnName("password");
             entity.Property(e => e.Status).HasColumnName("status");
         });
@@ -163,9 +157,7 @@ public partial class DionizosDataContext : DbContext
 
             entity.ToTable("sessions");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.OrganizerId).HasColumnName("organizer_id");
             entity.Property(e => e.Time)
                 .HasColumnType("timestamp without time zone")
