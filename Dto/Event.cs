@@ -19,7 +19,7 @@ using Newtonsoft.Json;
 using Org.OpenAPITools.Converters;
 
 namespace Org.OpenAPITools.Models
-{ 
+{
     /// <summary>
     /// 
     /// </summary>
@@ -58,6 +58,20 @@ namespace Org.OpenAPITools.Models
         public long EndTime { get; set; }
 
         /// <summary>
+        /// Gets or Sets Latitude
+        /// </summary>
+
+        [DataMember(Name="latitude", EmitDefaultValue = false)]
+        public string Latitude { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Longitude
+        /// </summary>
+
+        [DataMember(Name="longitude", EmitDefaultValue = false)]
+        public string Longitude { get; set; }
+
+        /// <summary>
         /// Gets or Sets Name
         /// </summary>
         [DataMember(Name="name", EmitDefaultValue=false)]
@@ -94,6 +108,8 @@ namespace Org.OpenAPITools.Models
             sb.Append("  Title: ").Append(Title).Append("\n");
             sb.Append("  StartTime: ").Append(StartTime).Append("\n");
             sb.Append("  EndTime: ").Append(EndTime).Append("\n");
+            sb.Append("  Latitude: ").Append(Latitude).Append("\n");
+            sb.Append("  Longitude: ").Append(Longitude).Append("\n");
             sb.Append("  Name: ").Append(Name).Append("\n");
             sb.Append("  PlaceSchema: ").Append(PlaceSchema).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
@@ -133,47 +149,57 @@ namespace Org.OpenAPITools.Models
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
 
-            return 
+            return
                 (
                     Id == other.Id ||
                     
                     Id.Equals(other.Id)
-                ) && 
+                ) &&
                 (
                     FreePlace == other.FreePlace ||
                     
                     FreePlace.Equals(other.FreePlace)
-                ) && 
+                ) &&
                 (
                     Title == other.Title ||
                     Title != null &&
                     Title.Equals(other.Title)
-                ) && 
+                ) &&
                 (
                     StartTime == other.StartTime ||
                     
                     StartTime.Equals(other.StartTime)
-                ) && 
+                ) &&
                 (
                     EndTime == other.EndTime ||
                     
                     EndTime.Equals(other.EndTime)
-                ) && 
+                ) &&
+                (
+                    Latitude == other.Latitude ||
+                    Latitude != null &&
+                    Latitude.Equals(other.Latitude)
+                ) &&
+                (
+                    Longitude == other.Longitude ||
+                    Longitude != null &&
+                    Longitude.Equals(other.Longitude)
+                ) &&
                 (
                     Name == other.Name ||
                     Name != null &&
                     Name.Equals(other.Name)
-                ) && 
+                ) &&
                 (
                     PlaceSchema == other.PlaceSchema ||
                     PlaceSchema != null &&
                     PlaceSchema.Equals(other.PlaceSchema)
-                ) && 
+                ) &&
                 (
                     Status == other.Status ||
                     
                     Status.Equals(other.Status)
-                ) && 
+                ) &&
                 (
                     Categories == other.Categories ||
                     Categories != null &&
@@ -196,19 +222,23 @@ namespace Org.OpenAPITools.Models
                     hashCode = hashCode * 59 + Id.GetHashCode();
                     
                     hashCode = hashCode * 59 + FreePlace.GetHashCode();
-                    if (Title != null)
+                if (Title != null)
                     hashCode = hashCode * 59 + Title.GetHashCode();
                     
                     hashCode = hashCode * 59 + StartTime.GetHashCode();
                     
                     hashCode = hashCode * 59 + EndTime.GetHashCode();
-                    if (Name != null)
+                if (Latitude != null)
+                    hashCode = hashCode * 59 + Latitude.GetHashCode();
+                if (Longitude != null)
+                    hashCode = hashCode * 59 + Longitude.GetHashCode();
+                if (Name != null)
                     hashCode = hashCode * 59 + Name.GetHashCode();
-                    if (PlaceSchema != null)
+                if (PlaceSchema != null)
                     hashCode = hashCode * 59 + PlaceSchema.GetHashCode();
                     
                     hashCode = hashCode * 59 + Status.GetHashCode();
-                    if (Categories != null)
+                if (Categories != null)
                     hashCode = hashCode * 59 + Categories.GetHashCode();
                 return hashCode;
             }
