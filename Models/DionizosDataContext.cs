@@ -79,6 +79,12 @@ public partial class DionizosDataContext : DbContext
             entity.Property(e => e.Endtime)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("endtime");
+            entity.Property(e => e.Latitude)
+                .HasMaxLength(20)
+                .HasColumnName("latitude");
+            entity.Property(e => e.Longitude)
+                .HasMaxLength(20)
+                .HasColumnName("longitude");
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.Owner).HasColumnName("owner");
             entity.Property(e => e.Placecapacity).HasColumnName("placecapacity");
