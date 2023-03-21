@@ -1,7 +1,9 @@
+using System.Runtime.CompilerServices;
 using dionizos_backend_app.Models;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using System;
 
 namespace dionizos_backend_app
 {
@@ -10,6 +12,10 @@ namespace dionizos_backend_app
         public static void Main(string[] args)
         {
             Prelaunch.GetSecrets();
+            var configuration =  new ConfigurationBuilder()
+                .AddJsonFile($"appsettings.json");
+            var config = configuration.Build();
+            
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -24,8 +30,10 @@ namespace dionizos_backend_app
             builder.Services
                 .AddMvc(options =>
                 {
-                    options.InputFormatters.RemoveType<Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonInputFormatter>();
-                    options.OutputFormatters.RemoveType<Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonOutputFormatter>();
+                    options.InputFormatters
+                        .RemoveType<Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonInputFormatter>();
+                    options.OutputFormatters
+                        .RemoveType<Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonOutputFormatter>();
                 })
                 .AddNewtonsoftJson(opts =>
                 {
@@ -35,16 +43,17 @@ namespace dionizos_backend_app
                 .AddXmlSerializerFormatters();
 
             builder.Services.AddCors();
+            builder.Services.AddSingleton<IConfigurationRoot>(config);
 
             var app = builder.Build();
-
+            
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
