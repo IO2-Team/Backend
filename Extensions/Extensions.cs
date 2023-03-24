@@ -7,8 +7,9 @@ namespace dionizos_backend_app.Extensions
 {
     internal static class Extensions
     {
-        public static OrganizerDTO AsDto(this Organizer organizer, DionizosDataContext context)
+        public static OrganizerDTO AsDto(this Organizer organizer)
         {
+            DionizosDataContext context = new();
             return new OrganizerDTO()
             {
                 Id = organizer.Id,
@@ -19,13 +20,14 @@ namespace dionizos_backend_app.Extensions
                 Events = context.Events
                                 .Where(x => x.Owner == organizer.Id)
                                 .AsEnumerable()
-                                .Select(x => x.AsDto(context))
+                                .Select(x => x.AsDto())
                                 .ToList(),
             };
         }
 
-        public static EventDTO AsDto(this Event ev, DionizosDataContext context)
+        public static EventDTO AsDto(this Event ev)
         {
+            DionizosDataContext context = new();
             return new EventDTO()
             {
                 Id = ev.Id,

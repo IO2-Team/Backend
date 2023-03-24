@@ -9,6 +9,7 @@
  */
 
 using System.ComponentModel.DataAnnotations;
+using dionizos_backend_app;
 using dionizos_backend_app.Extensions;
 using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +46,6 @@ namespace Org.OpenAPITools.Controllers
         {
             int Id = int.Parse(id);
             DateTime currTime = DateTime.Now;
-            // TODO: (kutakw) email verification, currently id is enough
             Emailcode? entity = await _context.Emailcodes
                                             .Include(x => x.Organizer)
                                             .FirstOrDefaultAsync(x =>
@@ -67,7 +67,7 @@ namespace Org.OpenAPITools.Controllers
             // save changes
             await _context.SaveChangesAsync();
 
-            OrganizerDTO dto = organizer.AsDto(_context);
+            OrganizerDTO dto = organizer.AsDto();
             return StatusCode(201, dto);
         }
 
@@ -80,15 +80,51 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">id not found</response>
         [HttpDelete]
         [Route("/organizer/{id}")]
-        public virtual IActionResult DeleteOrganizer([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id)
+        public virtual async Task<IActionResult> DeleteOrganizer([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id)
         {
+            int sessionLengthHours = 2;
+            // Validate session
+            if(!Helpers.isSessionValid(_context, sessionToken, TimeSpan.FromHours(sessionLengthHours)))
+            {
+                // invalid session
+                return StatusCode(401);
+            }
 
-            //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(204);
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
+            int Id = int.Parse(id);
+            Organizer? organizer = await _context.Organizers
+                                           .Include(x => x.Events)
+                                           .FirstOrDefaultAsync(x => x.Id == Id);
 
-            throw new NotImplementedException();
+            if(organizer == null)
+            {
+                // No valid organizer with provided id
+                return StatusCode(404);
+            }
+
+            // check if any planned or pending events exist
+            if(organizer.Events.Any(x => 
+                x.Status == (int)EventStatus.InFutureEnum
+                || x.Status == (int)EventStatus.PendingEnum))
+            {
+                // FIXME: (kutakw) przydalby sie jakis status code
+                return StatusCode(404);
+            }
+
+            // Hash all data of organizer
+            organizer.Name = organizer.Name.GetHashCode().ToString();
+            organizer.Email = organizer.Email.GetHashCode().ToString();
+            organizer.Password = organizer.Password.GetHashCode().ToString();
+
+            // Cancell all events
+            foreach(Event ev in organizer.Events)
+            {
+                ev.Status = (int)EventStatus.CancelledEnum;
+            }
+
+            // save in db
+            await _context.SaveChangesAsync();
+
+            return StatusCode(204);
         }
 
         /// <summary>
@@ -206,8 +242,78 @@ namespace Org.OpenAPITools.Controllers
 
             // TODO: (kutakw) send email with verification code
 
-            OrganizerDTO dto = organizer.AsDto(_context);
+            OrganizerDTO dto = organizer.AsDto();
             return StatusCode(201, dto);
+        }
+
+        [HttpGet]
+        [Route("/organizer/test")]
+        public virtual async Task<IActionResult> Test()
+        {
+            const string email = "testOrg";
+            const string username = "test";
+            const string pass = "test";
+            await SignUp(username, email, pass);
+
+            Organizer organizer = await _context.Organizers
+                                     .Include(x => x.Emailcodes)
+                                     .Include(x => x.Events)
+                                     .Include(x => x.Sessions)
+                                     .FirstAsync(x => x.Email == email);
+
+            await Confirm(organizer.Id.ToString(), organizer.Emailcodes.First().Code);
+            await LoginOrganizer(email, pass);
+            await _context.Entry(organizer).ReloadAsync();
+            organizer.Events.Add(new Event
+            {
+                Title = "testEv1",
+                Name = null,
+                Starttime = DateTime.Now,
+                Endtime = DateTime.Now,
+                Latitude = "123",
+                Longitude = "123",
+                Categories = 0,
+                Status = (int)EventStatus.InFutureEnum,
+                Placecapacity = 120,
+                Placeschema = null,
+            });
+            organizer.Events.Add(new Event
+            {
+                Title = "testEv2",
+                Name = null,
+                Starttime = DateTime.Now,
+                Endtime = DateTime.Now.AddDays(1.0),
+                Latitude = "2",
+                Longitude = "2",
+                Categories = 0,
+                Status = (int)EventStatus.PendingEnum,
+                Placecapacity = 160,
+                Placeschema = null,
+            });
+            organizer.Events.Add(new Event
+            {
+                Title = "testEv3",
+                Name = null,
+                Starttime = DateTime.Now.AddDays(1.0),
+                Endtime = DateTime.Now.AddDays(2.0),
+                Latitude = "3",
+                Longitude = "1",
+                Categories = 0,
+                Status = (int)EventStatus.DoneEnum,
+                Placecapacity = 1,
+                Placeschema = null,
+            });
+            await _context.SaveChangesAsync();
+            OrganizerDTO dto = organizer.AsDto();
+            await DeleteOrganizer(organizer.Emailcodes.Last().Code, organizer.Id.ToString());
+
+            _context.Events.RemoveRange(organizer.Events);
+            _context.Emailcodes.RemoveRange(organizer.Emailcodes);
+            _context.Sessions.RemoveRange(organizer.Sessions);
+            _context.Organizers.Remove(organizer);
+            await _context.SaveChangesAsync();
+
+            return StatusCode(200, dto);
         }
     }
 }
