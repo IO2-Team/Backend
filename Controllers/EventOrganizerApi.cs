@@ -25,6 +25,7 @@ namespace Org.OpenAPITools.Controllers
     public class EventOrganizerApiController : ControllerBase
     {
         private readonly DionizosDataContext _context;
+        private readonly Random _random = new();
 
         public EventOrganizerApiController(DionizosDataContext context)
         {
@@ -43,21 +44,23 @@ namespace Org.OpenAPITools.Controllers
         public virtual async Task<IActionResult> Confirm([FromRoute (Name = "id")][Required]string id, [FromQuery (Name = "code")][Required()]string code)
         {
             int Id = int.Parse(id);
+            DateTime currTime = DateTime.Now;
             // TODO: (kutakw) email verification, currently id is enough
             Emailcode? entity = await _context.Emailcodes
-                                            .FirstOrDefaultAsync(x => x.OrganizerId == Id
-                                                && (true || x.Code == code));
+                                            .Include(x => x.Organizer)
+                                            .FirstOrDefaultAsync(x =>
+                                                x.OrganizerId == Id
+                                                && x.Code == code
+                                                && currTime < x.Time.AddDays(1.0));
 
             // verify id and code
-            if(entity == null)
+            if (entity == null)
             {
                 // wrong email/code, return bad request
                 return StatusCode(400);
             }
 
-            Organizer organizer = await _context.Organizers
-                                             .Where(x => x.Id == Id)
-                                             .FirstAsync();
+            Organizer organizer = entity.Organizer;
 
             // update organizer status
             organizer.Status = (int)Organizer.StatusEnum.ConfirmedEnum;
@@ -176,7 +179,6 @@ namespace Org.OpenAPITools.Controllers
             // Create new organizer
             Organizer organizer = new()
             {
-                //Id = organizerId,
                 Email = email,
                 Name = name,
                 Password = password,
@@ -189,14 +191,13 @@ namespace Org.OpenAPITools.Controllers
             // Create Email Code
             Emailcode emailcode = new()
             {
-                //Id = emailcodeId,
                 OrganizerId = organizer.Id,
-                Time = DateTime.Now.AddDays(1.0),
-
-                // FIXME: (kutakw) Probably we should change that :)
-                Code = (organizer.Email.GetHashCode().ToString() 
-                        + " "
-                        + organizer.Name.ToString()).Base64Encode(),
+                Time = DateTime.Now,
+                Code = string.Join(
+                    string.Empty,
+                    Enumerable.Range(0, 6)
+                              .Select(_ => _random.Next(0, 9).ToString())
+                ),
             };
 
             // Add email code to db
@@ -206,7 +207,6 @@ namespace Org.OpenAPITools.Controllers
             // TODO: (kutakw) send email with verification code
 
             OrganizerDTO dto = organizer.AsDto(_context);
-            dto.Name = name;
             return StatusCode(201, dto);
         }
     }
