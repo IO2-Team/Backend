@@ -24,10 +24,12 @@ namespace Org.OpenAPITools.Controllers
     {
         DionizosDataContext _dionizosDataContext;
         IConfigurationRoot _config;
-        public CategoriesApiController(DionizosDataContext dionizosDataContext, IConfigurationRoot config)
+        IHelper _helper;
+        public CategoriesApiController(DionizosDataContext dionizosDataContext, IConfigurationRoot config, IHelper helper)
         {
             _dionizosDataContext = dionizosDataContext;
             _config = config;
+            _helper = helper;
         }
         /// <summary>
         /// Create new category
@@ -48,32 +50,35 @@ namespace Org.OpenAPITools.Controllers
             string exampleJson = null;
             exampleJson = "{\r\n  \"name\" : \"Sport\",\r\n  \"id\" : 1\r\n}";
             
-            var example = exampleJson != null
-            ? Newtonsoft.Json.JsonConvert.DeserializeObject<Category>(exampleJson)
-            : default(Category);
-            //TODO: Change the data returned
-            if (categoryName.Length > 1 && categoryName.Length <= 250)
+
+            int sessionLengthHours = int.Parse(_config["SessionLengthHours"]);
+            if (_helper.Validate(sessionToken, TimeSpan.FromHours(sessionLengthHours)))
             {
-                int sessionLengthHours = int.Parse(_config["SessionLengthHours"]);
-                if (Helpers.isSessionValid(_dionizosDataContext, sessionToken, TimeSpan.FromHours(sessionLengthHours)))
+                if (categoryName.Length > 1 && categoryName.Length <= 250)
                 {
                     if (_dionizosDataContext.Categories.Find(categoryName) == null)
                     {
-                        _dionizosDataContext.Categories.Add(new dionizos_backend_app.Models.Category { Name = categoryName });
+                        var cat = new dionizos_backend_app.Models.Category { Name = categoryName };
+                        _dionizosDataContext.Categories.Add(cat);
                         _dionizosDataContext.SaveChanges();
-                        return StatusCode(200);
+                        return StatusCode(201,cat);
                     }
                     else
                     {
                         return StatusCode(400);
                     }
+                
                 }
                 else
                 {
                     return StatusCode(400);
                 }
+                
             }
-            return new ObjectResult(example);
+            else
+            {
+                return StatusCode(400);
+            }
         }
 
         /// <summary>

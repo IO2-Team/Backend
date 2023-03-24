@@ -44,6 +44,7 @@ namespace dionizos_backend_app
 
             builder.Services.AddCors();
             builder.Services.AddSingleton<IConfigurationRoot>(config);
+            builder.Services.AddTransient<IHelper, Helpers>();
 
             var app = builder.Build();
             
