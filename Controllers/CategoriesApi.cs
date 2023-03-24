@@ -51,7 +51,7 @@ namespace Org.OpenAPITools.Controllers
             exampleJson = "{\r\n  \"name\" : \"Sport\",\r\n  \"id\" : 1\r\n}";
             
 
-            int sessionLengthHours = int.Parse(_config["SessionLengthHours"]);
+            int sessionLengthHours = _helper.GetSessionLengthHours();
             if (_helper.Validate(sessionToken, TimeSpan.FromHours(sessionLengthHours)))
             {
                 if (categoryName.Length > 1 && categoryName.Length <= 250)

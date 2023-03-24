@@ -7,13 +7,16 @@ namespace dionizos_backend_app
     public interface IHelper
     {
         public bool Validate(string sessionToken, TimeSpan sessionLength);
+        public int GetSessionLengthHours();
     }
     public class Helpers : IHelper
     {
         private DionizosDataContext _dionizosDataContext;
-        public Helpers(DionizosDataContext dionizosDataContext)
+        private IConfigurationRoot _configurationRoot;
+        public Helpers(DionizosDataContext dionizosDataContext, IConfigurationRoot configurationRoot)
         {
             _dionizosDataContext = dionizosDataContext;
+            _configurationRoot = configurationRoot;
         }
         public bool Validate(string sessionToken, TimeSpan sessionLength)
         {
@@ -21,5 +24,9 @@ namespace dionizos_backend_app
 
         }
 
+        public int GetSessionLengthHours()
+        {
+            return int.Parse(_configurationRoot["SessionLengthHours"]);
+        }
     }
 }
