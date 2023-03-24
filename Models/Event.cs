@@ -17,6 +17,10 @@ public partial class Event
 
     public DateTime Endtime { get; set; }
 
+    public string Latitude { get; set; } = null!;
+
+    public string Longitude { get; set; } = null!;
+
     public int Categories { get; set; }
 
     public int Status { get; set; }
