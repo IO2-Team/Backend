@@ -21,8 +21,6 @@ public partial class Event
 
     public string Longitude { get; set; } = null!;
 
-    public int Categories { get; set; }
-
     public int Status { get; set; }
 
     public int Placecapacity { get; set; }
