@@ -115,7 +115,6 @@ namespace Org.OpenAPITools.Controllers
 
             //newEvent.Eventincategories; //czy uzupelniane automatucznie
             return StatusCode(200, newEvent);
-            return StatusCode(400);
         }
 
         /// <summary>
