@@ -50,6 +50,7 @@ namespace Org.OpenAPITools.Controllers
             DateTime currTime = DateTime.Now;
             Emailcode? entity = await _context.Emailcodes
                                             .Include(x => x.Organizer)
+                                            .OrderByDescending(x => x.Time)
                                             .FirstOrDefaultAsync(x =>
                                                 x.OrganizerId == Id
                                                 && x.Code == code
@@ -142,13 +143,15 @@ namespace Org.OpenAPITools.Controllers
         {
             // Check if organizer exists
             Organizer? organizer = await _context.Organizers
-                                                 .FirstOrDefaultAsync(
-                                                    x => x.Email == email 
-                                                    && x.Password == password
+                                                 .FirstOrDefaultAsync(x =>
+                                                    string.Equals(x.Email, email)
                                                     && x.Status == (int)Organizer.StatusEnum.ConfirmedEnum);
-            if(organizer == null)
+
+            // check if organizer with email exists
+            if (organizer == null
+                // check if valid password
+                || !string.Equals(organizer.Password, Extensions.EncryptPass(password)))
             {
-                // Invalid email/password
                 return StatusCode(400);
             }
 
@@ -204,12 +207,46 @@ namespace Org.OpenAPITools.Controllers
         [Route("/organizer")]
         public virtual async Task<IActionResult> SignUp([FromQuery (Name = "name")][Required()]string name, [FromQuery (Name = "email")][Required()]string email, [FromQuery (Name = "password")][Required()]string password)
         {
+            async Task GenerateEmailcode(DionizosDataContext _context, Organizer organizer)
+            {
+                // Create Email Code
+                Emailcode emailcode = new()
+                {
+                    OrganizerId = organizer.Id,
+                    Time = DateTime.Now,
+                    Code = string.Join(
+                        string.Empty,
+                        Enumerable.Range(0, 6)
+                                  .Select(_ => _random.Next(0, 9).ToString())
+                    ),
+                };
+
+                // Add email code to db
+                await _context.Emailcodes.AddAsync(emailcode);
+                await _context.SaveChangesAsync();
+
+                // TODO: (kutakw) send email with verification code + add to logs
+            };
+            /////////////////////////////////////////////////////////////////////////
+
             // Check if organizer with that name or email already exists
             Organizer? organizerInDb =
                 await _context.Organizers
                               .FirstOrDefaultAsync(x => x.Name == name || x.Email == email);
+
             if (organizerInDb != null)
             {
+                if(organizerInDb.Status == (int)Organizer.StatusEnum.PendingEnum
+                    && organizerInDb.Name == name
+                    && organizerInDb.Email == email)
+                {
+                    // resend code via mail
+                    // gen email
+                    await GenerateEmailcode(_context, organizerInDb);
+
+                    return StatusCode(200, organizerInDb.AsDto());
+                }
+
                 // return bad request and no body
                 return StatusCode(400);
             }
@@ -219,30 +256,15 @@ namespace Org.OpenAPITools.Controllers
             {
                 Email = email,
                 Name = name,
-                Password = password,
+                Password = Extensions.EncryptPass(password),
                 Status = (int)Organizer.StatusEnum.PendingEnum,
             };
             // Add organizer to db
             await _context.Organizers.AddAsync(organizer);
             await _context.SaveChangesAsync();
 
-            // Create Email Code
-            Emailcode emailcode = new()
-            {
-                OrganizerId = organizer.Id,
-                Time = DateTime.Now,
-                Code = string.Join(
-                    string.Empty,
-                    Enumerable.Range(0, 6)
-                              .Select(_ => _random.Next(0, 9).ToString())
-                ),
-            };
-
-            // Add email code to db
-            await _context.Emailcodes.AddAsync(emailcode);
-            await _context.SaveChangesAsync();
-
-            // TODO: (kutakw) send email with verification code
+            // generate email
+            await GenerateEmailcode(_context, organizer);
 
             OrganizerDTO dto = organizer.AsDto();
             return StatusCode(201, dto);

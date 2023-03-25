@@ -2,10 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Org.OpenAPITools.Models;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace dionizos_backend_app.Extensions
 {
-    internal static class Extensions
+    public static class Extensions
     {
         public static OrganizerDTO AsDto(this Organizer organizer)
         {
@@ -90,6 +92,28 @@ namespace dionizos_backend_app.Extensions
         {
             byte[] encodedBytes = Convert.FromBase64String(text);
             return System.Text.Encoding.UTF8.GetString(encodedBytes);
+        }
+
+        public static string EncryptPass(string password)
+        {
+            byte[] salt = Encoding.ASCII.GetBytes("Dionizos to bog wina");
+            int iterations = 5000;
+            int hashLength = 255;
+            // Create a new instance of the Rfc2898DeriveBytes class using the password, salt, and number of iterations
+            var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations);
+
+            // Generate the hash value for the password
+            byte[] hash = pbkdf2.GetBytes(hashLength);
+
+            // Combine the salt and hash values into a single byte array
+            byte[] hashBytes = new byte[salt.Length + hash.Length];
+            Array.Copy(salt, 0, hashBytes, 0, salt.Length);
+            Array.Copy(hash, 0, hashBytes, salt.Length, hash.Length);
+
+            // Convert the byte array to a base64-encoded string
+            string hashedPassword = Convert.ToBase64String(hashBytes);
+
+            return hashedPassword;
         }
     }
 }
