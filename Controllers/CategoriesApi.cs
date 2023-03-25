@@ -44,10 +44,6 @@ namespace Org.OpenAPITools.Controllers
         public virtual IActionResult AddCategories([FromHeader] [Required()] string sessionToken,
             [FromQuery(Name = "categoryName")] [Required()] string categoryName)
         {
-            //TODO: Uncomment the next line to return response 201 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(201, default(Category));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
             var organizer = _helper.Validate(sessionToken);
             if (organizer is null) return StatusCode(400);
             if (categoryName.Length < 2 || categoryName.Length > 250) return StatusCode(400);
@@ -70,16 +66,6 @@ namespace Org.OpenAPITools.Controllers
         [Route("/categories")]
         public virtual IActionResult GetCategories()
         {
-
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(List<Category>));
-            string exampleJson = null;
-            exampleJson = "[ {\r\n  \"name\" : \"Sport\",\r\n  \"id\" : 1\r\n}, {\r\n  \"name\" : \"Sport\",\r\n  \"id\" : 1\r\n} ]";
-            
-            var example = exampleJson != null
-            ? Newtonsoft.Json.JsonConvert.DeserializeObject<List<Category>>(exampleJson)
-            : default(List<Category>);
-            //TODO: Change the data returned
             return new ObjectResult(_dionizosDataContext.Categories.ToList());
         }
     }

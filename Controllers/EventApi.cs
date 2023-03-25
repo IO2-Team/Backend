@@ -51,12 +51,8 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">event can not be created</response>
         [HttpPost]
         [Route("/events")]
-        public virtual IActionResult AddEvent([FromHeader][Required()] string sessionToken, [FromQuery][Required()] string title, [FromQuery][Required()] string name, [FromQuery][Required()] int? freePlace, [FromQuery][Required()] int? startTime, [FromQuery][Required()] int? endTime, [FromQuery][Required()] string latitude, [FromQuery][Required()] string longitude, [FromQuery][Required()] List<int?> categories, [FromQuery] string placeSchema)
+        public virtual async Task<IActionResult > AddEvent([FromHeader][Required()] string sessionToken, [FromQuery][Required()] string title, [FromQuery][Required()] string name, [FromQuery][Required()] int? freePlace, [FromQuery][Required()] int? startTime, [FromQuery][Required()] int? endTime, [FromQuery][Required()] string latitude, [FromQuery][Required()] string longitude, [FromQuery][Required()] List<int?> categories, [FromQuery] string placeSchema)
         {
-            //TODO: Uncomment the next line to return response 201 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(201, default(Event));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
             var organizer = _helper.Validate(sessionToken);
             if (organizer is null) return StatusCode(400);
             if (freePlace is null || startTime is null || endTime is null)
@@ -65,24 +61,11 @@ namespace Org.OpenAPITools.Controllers
             }
             if (title.Length == 0 || title.Length > 250 || latitude.Length == 0 || latitude.Length > 20 ||
                 longitude.Length == 0 || longitude.Length < 20) return StatusCode(400);
-            if (categories is not null)
-            {
-                int exisitng_categories_cnt =  _dionizosDataContext.Categories.Where(c => categories.Contains(c.Id)).Count();
-                if (exisitng_categories_cnt == categories.Count)
-                {
-                    return StatusCode(400);
-                }
-            }
-
-            if (freePlace is not null  && freePlace <= 0 )return StatusCode(400);
-
-            if (startTime is not null)
-            {
-                if (startTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) return StatusCode(400);
-                if (endTime is not null && endTime >= startTime) return StatusCode(400);
-            }
-
-            if (endTime is not null && endTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds())return StatusCode(400);
+            int exisitng_categories_cnt =  _dionizosDataContext.Categories.Where(c => categories.Contains(c.Id)).Count();
+            if (exisitng_categories_cnt == categories.Count)return StatusCode(400); if ( freePlace <= 0 )return StatusCode(400);
+            if (startTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) return StatusCode(400);
+            if ( endTime >= startTime) return StatusCode(400);
+            if (endTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds())return StatusCode(400);
 
             dionizos_backend_app.Models.Event newEvent = new dionizos_backend_app.Models.Event();
             newEvent.Title = title;
@@ -97,8 +80,8 @@ namespace Org.OpenAPITools.Controllers
             //newEvent.OwnerNavigation = organizer; //czy to trzeba uzupelnic?
             newEvent.Placeschema = placeSchema;
 
-            _dionizosDataContext.Events.Add(newEvent);
-            _dionizosDataContext.SaveChanges(); //aby uzyskac id eventu
+            await _dionizosDataContext.Events.AddAsync(newEvent);
+            await _dionizosDataContext.SaveChangesAsync(); //aby uzyskac id eventu
 
             //newEvent.Eventincategories;
             //add categories table
@@ -107,10 +90,10 @@ namespace Org.OpenAPITools.Controllers
                 Eventincategory eventincategory = new Eventincategory();
                 eventincategory.CategoriesId = category.Id;
                 eventincategory.EventId = newEvent.Id;
-                _dionizosDataContext.Eventincategories.Add(eventincategory);
+                await _dionizosDataContext.Eventincategories.AddAsync(eventincategory);
             }
 
-            _dionizosDataContext.SaveChanges();
+            await _dionizosDataContext.SaveChangesAsync();
 
 
             //newEvent.Eventincategories; //czy uzupelniane automatucznie
