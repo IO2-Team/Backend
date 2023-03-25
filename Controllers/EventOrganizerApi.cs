@@ -152,7 +152,7 @@ namespace Org.OpenAPITools.Controllers
                 return StatusCode(400);
             }
 
-            DateTime time = DateTime.Now.AddHours(2.0);
+            DateTime time = DateTime.Now;
 
             // Create new session with token
             Session session = new()
