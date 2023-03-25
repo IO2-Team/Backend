@@ -75,7 +75,6 @@ public partial class DionizosDataContext : DbContext
             entity.ToTable("events");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Categories).HasColumnName("categories");
             entity.Property(e => e.Endtime)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("endtime");
