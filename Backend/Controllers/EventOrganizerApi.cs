@@ -60,11 +60,12 @@ namespace Org.OpenAPITools.Controllers
                                             .OrderByDescending(x => x.Time)
                                             .FirstOrDefaultAsync(x =>
                                                 x.OrganizerId == Id
-                                                && x.Code == code
                                                 && currTime < x.Time.AddDays(1.0));
 
+
             // verify id and code
-            if (entity == null)
+            if (entity == null
+                || entity.Code != code)
             {
                 // wrong email/code, return bad request
                 return StatusCode(400);
@@ -72,6 +73,10 @@ namespace Org.OpenAPITools.Controllers
 
             Organizer organizer = entity.Organizer;
 
+            if(organizer.Status != (int)Organizer.StatusEnum.PendingEnum)
+            {
+                return StatusCode(400);
+            }
             // update organizer status
             organizer.Status = (int)Organizer.StatusEnum.ConfirmedEnum;
             // save changes

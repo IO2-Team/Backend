@@ -20,13 +20,17 @@ namespace dionizos_backend_app
         }
         private Organizer? Validate(string sessionToken, TimeSpan sessionLength)
         {
-            var lastSession = _dionizosDataContext.Sessions.FirstOrDefault(x => x.Token == sessionToken);
+            var lastSession = _dionizosDataContext.Sessions
+                                                  .Include(x => x.Organizer)
+                                                  .FirstOrDefault(x => x.Token == sessionToken);
             if (lastSession is null) return null;
             var mostRecentSession = _dionizosDataContext.Sessions
                 .Where( x=> x.Organizer == lastSession.Organizer)
                 .Include(x => x.Organizer)
                 .ThenInclude(x => x.Events)
-                .OrderBy(x => x.Time).Last();
+                .OrderBy(x => x.Time)
+                .LastOrDefault();
+
             if (mostRecentSession.Id != lastSession.Id)
             {
                 return null;
