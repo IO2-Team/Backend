@@ -4,6 +4,13 @@ using Microsoft.OpenApi.Models;
 using Org.OpenAPITools.Models;
 using System.Security.Cryptography;
 using System.Text;
+using OrganizerDTO = Org.OpenAPITools.Models.Organizer;
+using Organizer = dionizos_backend_app.Models.Organizer;
+using EventDTO = Org.OpenAPITools.Models.Event;
+using Event = dionizos_backend_app.Models.Event;
+using CategoryDTO = Org.OpenAPITools.Models.Category;
+using Category = dionizos_backend_app.Models.Category;
+using LoginOrganizer200ResponseDTO = Org.OpenAPITools.Models.LoginOrganizer200Response;
 
 namespace dionizos_backend_app.Extensions
 {
@@ -33,23 +40,16 @@ namespace dionizos_backend_app.Extensions
             return new EventDTO()
             {
                 Id = ev.Id,
-
-                // FIXME: (kutakw) change for async
                 FreePlace = ev.Placecapacity - context.Reservatons.Count(x => x.EventId == ev.Id),
-
                 Title = ev.Title,
                 StartTime = ((DateTimeOffset)ev.Starttime).ToUnixTimeSeconds(),
                 EndTime = ((DateTimeOffset)ev.Endtime).ToUnixTimeSeconds(),
-
-                // FIXME: (kutakw) currently in db we got int as events name
-                Name = "FIXME",
-                // FIXME: (kutakw) placeSchema not functioning yet + i dont think it outta be int
-                PlaceSchema = ev.Placeschema.ToString() ?? "",
-
+                Name = ev.Name ?? "unknown",
+                PlaceSchema = ev.Placeschema ?? "",
                 Status = (EventStatus)ev.Status,
                 Categories = context.Eventincategories
                                     .Include(x => x.Categories)
-                                    .Where(x => x.CategoriesId == ev.Categories)
+                                    .Where(x => x.EventId == ev.Id)
                                     .Select(x => x.Categories.AsDto())
                                     .ToList(),
             };

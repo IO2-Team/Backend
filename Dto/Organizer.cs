@@ -24,7 +24,7 @@ namespace Org.OpenAPITools.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class OrganizerDTO : IEquatable<OrganizerDTO>
+    public partial class Organizer : IEquatable<Organizer>
     {
         /// <summary>
         /// Gets or Sets Id
@@ -54,7 +54,7 @@ namespace Org.OpenAPITools.Models
         /// Gets or Sets Events
         /// </summary>
         [DataMember(Name="events", EmitDefaultValue=false)]
-        public List<EventDTO> Events { get; set; }
+        public List<Event> Events { get; set; }
 
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Org.OpenAPITools.Models
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((OrganizerDTO)obj);
+            return obj.GetType() == GetType() && Equals((Organizer)obj);
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Org.OpenAPITools.Models
         /// </summary>
         /// <param name="other">Instance of Organizer to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(OrganizerDTO other)
+        public bool Equals(Organizer other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -198,12 +198,12 @@ namespace Org.OpenAPITools.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(OrganizerDTO left, OrganizerDTO right)
+        public static bool operator ==(Organizer left, Organizer right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(OrganizerDTO left, OrganizerDTO right)
+        public static bool operator !=(Organizer left, Organizer right)
         {
             return !Equals(left, right);
         }

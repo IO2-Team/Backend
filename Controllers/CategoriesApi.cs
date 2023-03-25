@@ -12,7 +12,6 @@ using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using dionizos_backend_app;
-using Category = Org.OpenAPITools.Models.Category;
 
 namespace Org.OpenAPITools.Controllers
 {

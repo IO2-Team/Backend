@@ -16,6 +16,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
+using OrganizerDTO = Org.OpenAPITools.Models.Organizer;
+using Organizer = dionizos_backend_app.Models.Organizer;
+using EventDTO = Org.OpenAPITools.Models.Event;
+using Event = dionizos_backend_app.Models.Event;
+using CategoryDTO = Org.OpenAPITools.Models.Category;
+using Category = dionizos_backend_app.Models.Category;
+using LoginOrganizer200ResponseDTO = Org.OpenAPITools.Models.LoginOrganizer200Response;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -85,44 +92,27 @@ namespace Org.OpenAPITools.Controllers
         [Route("/organizer/{id}")]
         public virtual async Task<IActionResult> DeleteOrganizer([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id)
         {
-            int sessionLengthHours = _helper.GetSessionLengthHours();
+            Organizer? organizer = _helper.Validate(sessionToken);
             // Validate session
-            if(!await _helper.Validate(sessionToken, TimeSpan.FromHours(sessionLengthHours)))
+            if(organizer == null)
             {
                 // invalid session
-                return StatusCode(401);
+                return StatusCode(404);
             }
 
             int Id = int.Parse(id);
-            Organizer? organizer = await _context.Organizers
-                                           .Include(x => x.Events)
-                                           .FirstOrDefaultAsync(x => x.Id == Id);
-
-            if(organizer == null)
-            {
-                // No valid organizer with provided id
-                return StatusCode(404);
-            }
 
             // check if any planned or pending events exist
             if(organizer.Events.Any(x => 
                 x.Status == (int)EventStatus.InFutureEnum
                 || x.Status == (int)EventStatus.PendingEnum))
             {
-                // FIXME: (kutakw) przydalby sie jakis status code
                 return StatusCode(404);
             }
 
             // Hash all data of organizer
             organizer.Name = organizer.Name.GetHashCode().ToString();
             organizer.Email = organizer.Email.GetHashCode().ToString();
-            organizer.Password = organizer.Password.GetHashCode().ToString();
-
-            // Cancell all events
-            foreach(Event ev in organizer.Events)
-            {
-                ev.Status = (int)EventStatus.CancelledEnum;
-            }
 
             // save in db
             await _context.SaveChangesAsync();
@@ -269,123 +259,5 @@ namespace Org.OpenAPITools.Controllers
             OrganizerDTO dto = organizer.AsDto();
             return StatusCode(201, dto);
         }
-
-#if DEBUG
-        [HttpGet]
-        [Route("/organizer/test")]
-        public virtual async Task<IActionResult> Test()
-        {
-            const string email = "testOrg";
-            const string username = "test";
-            const string pass = "test";
-            await SignUp(username, email, pass);
-
-            Organizer organizer = await _context.Organizers
-                                     .Include(x => x.Emailcodes)
-                                     .Include(x => x.Events)
-                                     .Include(x => x.Sessions)
-                                     .FirstAsync(x => x.Email == email);
-
-            await Confirm(organizer.Id.ToString(), organizer.Emailcodes.First().Code);
-            await LoginOrganizer(email, pass);
-            await _context.Entry(organizer).ReloadAsync();
-            organizer.Events.Add(new Event
-            {
-                Title = "testEv1",
-                Name = null,
-                Starttime = DateTime.Now,
-                Endtime = DateTime.Now,
-                Latitude = "123",
-                Longitude = "123",
-                Categories = 0,
-                Status = (int)EventStatus.InFutureEnum,
-                Placecapacity = 120,
-                Placeschema = null,
-            });
-            organizer.Events.Add(new Event
-            {
-                Title = "testEv2",
-                Name = null,
-                Starttime = DateTime.Now,
-                Endtime = DateTime.Now.AddDays(1.0),
-                Latitude = "2",
-                Longitude = "2",
-                Categories = 0,
-                Status = (int)EventStatus.PendingEnum,
-                Placecapacity = 160,
-                Placeschema = null,
-            });
-            organizer.Events.Add(new Event
-            {
-                Title = "testEv3",
-                Name = null,
-                Starttime = DateTime.Now.AddDays(1.0),
-                Endtime = DateTime.Now.AddDays(2.0),
-                Latitude = "3",
-                Longitude = "1",
-                Categories = 0,
-                Status = (int)EventStatus.DoneEnum,
-                Placecapacity = 1,
-                Placeschema = null,
-            });
-            await _context.SaveChangesAsync();
-            await DeleteOrganizer(organizer.Sessions.Last().Token, organizer.Id.ToString());
-            await _context.Entry(organizer).ReloadAsync();
-            OrganizerDTO dto = organizer.AsDto();
-
-            _context.Events.RemoveRange(organizer.Events);
-            _context.Emailcodes.RemoveRange(organizer.Emailcodes);
-            _context.Sessions.RemoveRange(organizer.Sessions);
-            _context.Organizers.Remove(organizer);
-            await _context.SaveChangesAsync();
-
-            return StatusCode(200, dto);
-        }
-
-        [HttpGet]
-        [Route("/organizer/test2")]
-        public virtual async Task<IActionResult> Test2()
-        {
-            const string email = "testOrg2";
-            const string username = "test2";
-            const string pass = "test2";
-            await SignUp(username, email, pass);
-
-            Organizer organizer = await _context.Organizers
-                                     .Include(x => x.Emailcodes)
-                                     .Include(x => x.Events)
-                                     .Include(x => x.Sessions)
-                                     .FirstAsync(x => x.Email == email);
-
-            await Confirm(organizer.Id.ToString(), organizer.Emailcodes.First().Code);
-            await LoginOrganizer(email, pass);
-            await _context.Entry(organizer).ReloadAsync();
-            organizer.Events.Add(new Event
-            {
-                Title = "testEvDone",
-                Name = null,
-                Starttime = DateTime.Now.AddDays(1.0),
-                Endtime = DateTime.Now.AddDays(2.0),
-                Latitude = "3",
-                Longitude = "1",
-                Categories = 0,
-                Status = (int)EventStatus.DoneEnum,
-                Placecapacity = 1,
-                Placeschema = null,
-            });
-            await _context.SaveChangesAsync();
-            await DeleteOrganizer(organizer.Sessions.Last().Token, organizer.Id.ToString());
-            await _context.Entry(organizer).ReloadAsync();
-            OrganizerDTO dto = organizer.AsDto();
-
-            _context.Events.RemoveRange(organizer.Events);
-            _context.Emailcodes.RemoveRange(organizer.Emailcodes);
-            _context.Sessions.RemoveRange(organizer.Sessions);
-            _context.Organizers.Remove(organizer);
-            await _context.SaveChangesAsync();
-
-            return StatusCode(200, dto);
-        }
-#endif
     }
 }
