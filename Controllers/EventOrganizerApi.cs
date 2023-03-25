@@ -26,11 +26,13 @@ namespace Org.OpenAPITools.Controllers
     public class EventOrganizerApiController : ControllerBase
     {
         private readonly DionizosDataContext _context;
+        private readonly IHelper _helper;
         private readonly Random _random = new();
 
-        public EventOrganizerApiController(DionizosDataContext context)
+        public EventOrganizerApiController(DionizosDataContext context, IHelper helper)
         {
             _context = context;
+            _helper = helper;
         }
 
         /// <summary>
@@ -82,9 +84,9 @@ namespace Org.OpenAPITools.Controllers
         [Route("/organizer/{id}")]
         public virtual async Task<IActionResult> DeleteOrganizer([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id)
         {
-            int sessionLengthHours = 2;
+            int sessionLengthHours = _helper.GetSessionLengthHours();
             // Validate session
-            if(!Helpers.isSessionValid(_context, sessionToken, TimeSpan.FromHours(sessionLengthHours)))
+            if(!await _helper.Validate(sessionToken, TimeSpan.FromHours(sessionLengthHours)))
             {
                 // invalid session
                 return StatusCode(401);
@@ -246,6 +248,7 @@ namespace Org.OpenAPITools.Controllers
             return StatusCode(201, dto);
         }
 
+#if DEBUG
         [HttpGet]
         [Route("/organizer/test")]
         public virtual async Task<IActionResult> Test()
@@ -304,8 +307,9 @@ namespace Org.OpenAPITools.Controllers
                 Placeschema = null,
             });
             await _context.SaveChangesAsync();
+            await DeleteOrganizer(organizer.Sessions.Last().Token, organizer.Id.ToString());
+            await _context.Entry(organizer).ReloadAsync();
             OrganizerDTO dto = organizer.AsDto();
-            await DeleteOrganizer(organizer.Emailcodes.Last().Code, organizer.Id.ToString());
 
             _context.Events.RemoveRange(organizer.Events);
             _context.Emailcodes.RemoveRange(organizer.Emailcodes);
@@ -315,5 +319,51 @@ namespace Org.OpenAPITools.Controllers
 
             return StatusCode(200, dto);
         }
+
+        [HttpGet]
+        [Route("/organizer/test2")]
+        public virtual async Task<IActionResult> Test2()
+        {
+            const string email = "testOrg2";
+            const string username = "test2";
+            const string pass = "test2";
+            await SignUp(username, email, pass);
+
+            Organizer organizer = await _context.Organizers
+                                     .Include(x => x.Emailcodes)
+                                     .Include(x => x.Events)
+                                     .Include(x => x.Sessions)
+                                     .FirstAsync(x => x.Email == email);
+
+            await Confirm(organizer.Id.ToString(), organizer.Emailcodes.First().Code);
+            await LoginOrganizer(email, pass);
+            await _context.Entry(organizer).ReloadAsync();
+            organizer.Events.Add(new Event
+            {
+                Title = "testEvDone",
+                Name = null,
+                Starttime = DateTime.Now.AddDays(1.0),
+                Endtime = DateTime.Now.AddDays(2.0),
+                Latitude = "3",
+                Longitude = "1",
+                Categories = 0,
+                Status = (int)EventStatus.DoneEnum,
+                Placecapacity = 1,
+                Placeschema = null,
+            });
+            await _context.SaveChangesAsync();
+            await DeleteOrganizer(organizer.Sessions.Last().Token, organizer.Id.ToString());
+            await _context.Entry(organizer).ReloadAsync();
+            OrganizerDTO dto = organizer.AsDto();
+
+            _context.Events.RemoveRange(organizer.Events);
+            _context.Emailcodes.RemoveRange(organizer.Emailcodes);
+            _context.Sessions.RemoveRange(organizer.Sessions);
+            _context.Organizers.Remove(organizer);
+            await _context.SaveChangesAsync();
+
+            return StatusCode(200, dto);
+        }
+#endif
     }
 }

@@ -1,13 +1,31 @@
 ﻿using dionizos_backend_app.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace dionizos_backend_app
 {
-    public static class Helpers
+    public interface IHelper
     {
-        public static bool isSessionValid(DionizosDataContext dionizosDataContext, string sessionToken, TimeSpan sessionLength)
+        public Task<bool> Validate(string sessionToken, TimeSpan sessionLength);
+        public int GetSessionLengthHours();
+    }
+    public class Helpers : IHelper
+    {
+        private readonly DionizosDataContext _dionizosDataContext;
+        private readonly IConfigurationRoot _configurationRoot;
+        public Helpers(DionizosDataContext dionizosDataContext, IConfigurationRoot configurationRoot)
         {
-            return dionizosDataContext.Sessions.Any(x => x.Token == sessionToken && x.Time.ToUniversalTime() >= (DateTime.UtcNow - sessionLength));
+            _dionizosDataContext = dionizosDataContext;
+            _configurationRoot = configurationRoot;
+        }
+        public async Task<bool> Validate(string sessionToken, TimeSpan sessionLength)
+        {
+            return await _dionizosDataContext.Sessions.AnyAsync(x => x.Token == sessionToken && x.Time.ToUniversalTime() >= (DateTime.UtcNow - sessionLength));
+        }
 
+        public int GetSessionLengthHours()
+        {
+            return int.Parse(_configurationRoot["SessionLengthHours"]);
         }
     }
 }
