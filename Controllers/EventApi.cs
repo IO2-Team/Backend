@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
 using Category = Org.OpenAPITools.Models.Category;
 using Event = Org.OpenAPITools.Models.Event;
+using EventStatus = Org.OpenAPITools.Models.EventStatus;
 using Organizer = dionizos_backend_app.Models.Organizer;
 
 namespace Org.OpenAPITools.Controllers
@@ -56,10 +57,12 @@ namespace Org.OpenAPITools.Controllers
             // return StatusCode(201, default(Event));
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(400);
-            string exampleJson = null;
-            exampleJson = "{\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of Event\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of Event\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}";
             var organizer = _helper.Validate(sessionToken);
             if (organizer is null) return StatusCode(400);
+            if (freePlace is null || startTime is null || endTime is null)
+            {
+                return StatusCode(400);
+            }
             if (title.Length == 0 || title.Length > 250 || latitude.Length == 0 || latitude.Length > 20 ||
                 longitude.Length == 0 || longitude.Length < 20) return StatusCode(400);
             if (categories is not null)
@@ -81,13 +84,37 @@ namespace Org.OpenAPITools.Controllers
 
             if (endTime is not null && endTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds())return StatusCode(400);
 
-                dionizos_backend_app.Models.Event newEvent = new dionizos_backend_app.Models.Event();
-            //newEvent.Categories = categories is null ? new List<Category>() : categories;
-            //newEvent.Endtime = endTime;
+            dionizos_backend_app.Models.Event newEvent = new dionizos_backend_app.Models.Event();
+            newEvent.Title = title;
+            newEvent.Latitude = latitude;
+            newEvent.Longitude = longitude;
+            newEvent.Owner = organizer.Id;
+            newEvent.Name = name;
+            newEvent.Starttime = DateTimeOffset.FromUnixTimeSeconds((long)startTime).DateTime;
+            newEvent.Endtime = DateTimeOffset.FromUnixTimeSeconds((long)endTime).DateTime;
+            newEvent.Placecapacity = (int)freePlace;
+            newEvent.Status = (int)EventStatus.InFutureEnum;
+            //newEvent.OwnerNavigation = organizer; //czy to trzeba uzupelnic?
+            newEvent.Placeschema = placeSchema;
 
-            //dodanie kategorii
-            //_dionizosDataContext.Events.Add(newEvent);
-            //return StatusCode(200, newEvent);
+            _dionizosDataContext.Events.Add(newEvent);
+            _dionizosDataContext.SaveChanges(); //aby uzyskac id eventu
+
+            //newEvent.Eventincategories;
+            //add categories table
+            foreach (dionizos_backend_app.Models.Category category in _dionizosDataContext.Categories.Where(x => categories.Contains(x.Id)).ToArray())
+            {
+                Eventincategory eventincategory = new Eventincategory();
+                eventincategory.CategoriesId = category.Id;
+                eventincategory.EventId = newEvent.Id;
+                _dionizosDataContext.Eventincategories.Add(eventincategory);
+            }
+
+            _dionizosDataContext.SaveChanges();
+
+
+            //newEvent.Eventincategories; //czy uzupelniane automatucznie
+            return StatusCode(200, newEvent);
             return StatusCode(400);
         }
 
