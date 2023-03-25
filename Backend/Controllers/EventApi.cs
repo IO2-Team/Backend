@@ -10,12 +10,14 @@
 
 using System.ComponentModel.DataAnnotations;
 using dionizos_backend_app;
+using dionizos_backend_app.Extensions;
 using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
 using Category = Org.OpenAPITools.Models.Category;
-using Event = Org.OpenAPITools.Models.Event;
+using Event = dionizos_backend_app.Models.Event;
+using EventDTO = Org.OpenAPITools.Models.Event;
 using EventStatus = Org.OpenAPITools.Models.EventStatus;
 using Organizer = dionizos_backend_app.Models.Organizer;
 
@@ -51,7 +53,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">event can not be created</response>
         [HttpPost]
         [Route("/events")]
-        public virtual async Task<IActionResult > AddEvent([FromHeader][Required()] string sessionToken, [FromQuery][Required()] string title, [FromQuery][Required()] string name, [FromQuery][Required()] int? freePlace, [FromQuery][Required()] int? startTime, [FromQuery][Required()] int? endTime, [FromQuery][Required()] string latitude, [FromQuery][Required()] string longitude, [FromQuery][Required()] List<int?> categories, [FromQuery] string placeSchema)
+        public virtual async Task<IActionResult > AddEvent([FromHeader][Required()] string sessionToken, [FromQuery][Required()] string title, [FromQuery][Required()] string name, [FromQuery][Required()] int? freePlace, [FromQuery][Required()] int? startTime, [FromQuery][Required()] int? endTime, [FromQuery][Required()] string latitude, [FromQuery][Required()] string longitude, [FromQuery][Required()] List<int?> categories, [FromQuery] string? placeSchema)
         {
             var organizer = _helper.Validate(sessionToken);
             if (organizer is null) return StatusCode(400);
@@ -60,14 +62,15 @@ namespace Org.OpenAPITools.Controllers
                 return StatusCode(400);
             }
             if (title.Length == 0 || title.Length > 250 || latitude.Length == 0 || latitude.Length > 20 ||
-                longitude.Length == 0 || longitude.Length < 20) return StatusCode(400);
+                longitude.Length == 0 || longitude.Length > 20) return StatusCode(400);
             int exisitng_categories_cnt =  _dionizosDataContext.Categories.Where(c => categories.Contains(c.Id)).Count();
-            if (exisitng_categories_cnt == categories.Count)return StatusCode(400); if ( freePlace <= 0 )return StatusCode(400);
+            if (exisitng_categories_cnt != categories.Count) return StatusCode(400);
+            if (freePlace < 0) return StatusCode(400);
             if (startTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) return StatusCode(400);
-            if ( endTime >= startTime) return StatusCode(400);
+            if (endTime < startTime) return StatusCode(400);
             if (endTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds())return StatusCode(400);
 
-            dionizos_backend_app.Models.Event newEvent = new dionizos_backend_app.Models.Event();
+            Event newEvent = new Event();
             newEvent.Title = title;
             newEvent.Latitude = latitude;
             newEvent.Longitude = longitude;
@@ -78,17 +81,18 @@ namespace Org.OpenAPITools.Controllers
             newEvent.Placecapacity = (int)freePlace;
             newEvent.Status = (int)EventStatus.InFutureEnum;
             //newEvent.OwnerNavigation = organizer; //czy to trzeba uzupelnic?
-            newEvent.Placeschema = placeSchema;
+            newEvent.Placeschema = placeSchema ?? "";
 
             await _dionizosDataContext.Events.AddAsync(newEvent);
             await _dionizosDataContext.SaveChangesAsync(); //aby uzyskac id eventu
 
             //newEvent.Eventincategories;
             //add categories table
-            foreach (dionizos_backend_app.Models.Category category in _dionizosDataContext.Categories.Where(x => categories.Contains(x.Id)).ToArray())
+            //foreach (dionizos_backend_app.Models.Category category in _dionizosDataContext.Categories.Where(x => categories.Contains(x.Id)).ToArray())
+            foreach (var category in categories)
             {
                 Eventincategory eventincategory = new Eventincategory();
-                eventincategory.CategoriesId = category.Id;
+                eventincategory.CategoriesId = category.Value;
                 eventincategory.EventId = newEvent.Id;
                 await _dionizosDataContext.Eventincategories.AddAsync(eventincategory);
             }
@@ -97,7 +101,8 @@ namespace Org.OpenAPITools.Controllers
 
 
             //newEvent.Eventincategories; //czy uzupelniane automatucznie
-            return StatusCode(200, newEvent);
+            EventDTO dto = newEvent.AsDto();
+            return StatusCode(200, dto);
         }
 
         /// <summary>
@@ -228,7 +233,7 @@ namespace Org.OpenAPITools.Controllers
         [HttpPatch]
         [Route("/events/{id}")]
         [Consumes("application/json")]
-        public virtual IActionResult PatchEvent([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id, [FromBody]Event _event)
+        public virtual IActionResult PatchEvent([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id, [FromBody]EventDTO _event)
         {
 
             //TODO: Uncomment the next line to return response 202 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
