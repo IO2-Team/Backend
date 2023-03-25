@@ -9,9 +9,20 @@
  */
 
 using System.ComponentModel.DataAnnotations;
+using dionizos_backend_app;
+using dionizos_backend_app.Extensions;
+using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
+using OrganizerDTO = Org.OpenAPITools.Models.Organizer;
+using Organizer = dionizos_backend_app.Models.Organizer;
+using EventDTO = Org.OpenAPITools.Models.Event;
+using Event = dionizos_backend_app.Models.Event;
+using CategoryDTO = Org.OpenAPITools.Models.Category;
+using Category = dionizos_backend_app.Models.Category;
+using LoginOrganizer200ResponseDTO = Org.OpenAPITools.Models.LoginOrganizer200Response;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -20,7 +31,17 @@ namespace Org.OpenAPITools.Controllers
     /// </summary>
     [ApiController]
     public class EventOrganizerApiController : ControllerBase
-    { 
+    {
+        private readonly DionizosDataContext _context;
+        private readonly IHelper _helper;
+        private readonly Random _random = new();
+
+        public EventOrganizerApiController(DionizosDataContext context, IHelper helper)
+        {
+            _context = context;
+            _helper = helper;
+        }
+
         /// <summary>
         /// Confirm orginizer account
         /// </summary>
@@ -30,21 +51,34 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">code wrong</response>
         [HttpPost]
         [Route("/organizer/{id}")]
-        public virtual IActionResult Confirm([FromRoute (Name = "id")][Required]string id, [FromQuery (Name = "code")][Required()]string code)
+        public virtual async Task<IActionResult> Confirm([FromRoute (Name = "id")][Required]string id, [FromQuery (Name = "code")][Required()]string code)
         {
+            int Id = int.Parse(id);
+            DateTime currTime = DateTime.Now;
+            Emailcode? entity = await _context.Emailcodes
+                                            .Include(x => x.Organizer)
+                                            .OrderByDescending(x => x.Time)
+                                            .FirstOrDefaultAsync(x =>
+                                                x.OrganizerId == Id
+                                                && x.Code == code
+                                                && currTime < x.Time.AddDays(1.0));
 
-            //TODO: Uncomment the next line to return response 201 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(201, default(Organizer));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            string exampleJson = null;
-            exampleJson = "{\r\n  \"password\" : \"12345\",\r\n  \"name\" : \"theUser\",\r\n  \"id\" : 10,\r\n  \"email\" : \"john@email.com\",\r\n  \"events\" : [ {\r\n    \"name\" : \"Long description of Event\",\r\n    \"freePlace\" : 2,\r\n    \"startTime\" : 1673034164,\r\n    \"id\" : 10,\r\n    \"endTime\" : 1683034164,\r\n    \"categories\" : [ {\r\n      \"name\" : \"Sport\",\r\n      \"id\" : 1\r\n    }, {\r\n      \"name\" : \"Sport\",\r\n      \"id\" : 1\r\n    } ],\r\n    \"title\" : \"Short description of Event\",\r\n    \"placeSchema\" : \"Seralized place schema\",\r\n    \"status\" : \"done\"\r\n  }, {\r\n    \"name\" : \"Long description of Event\",\r\n    \"freePlace\" : 2,\r\n    \"startTime\" : 1673034164,\r\n    \"id\" : 10,\r\n    \"endTime\" : 1683034164,\r\n    \"categories\" : [ {\r\n      \"name\" : \"Sport\",\r\n      \"id\" : 1\r\n    }, {\r\n      \"name\" : \"Sport\",\r\n      \"id\" : 1\r\n    } ],\r\n    \"title\" : \"Short description of Event\",\r\n    \"placeSchema\" : \"Seralized place schema\",\r\n    \"status\" : \"done\"\r\n  } ],\r\n  \"status\" : \"pending\"\r\n}";
-            
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<Organizer>(exampleJson)
-            : default(Organizer);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            // verify id and code
+            if (entity == null)
+            {
+                // wrong email/code, return bad request
+                return StatusCode(400);
+            }
+
+            Organizer organizer = entity.Organizer;
+
+            // update organizer status
+            organizer.Status = (int)Organizer.StatusEnum.ConfirmedEnum;
+            // save changes
+            await _context.SaveChangesAsync();
+
+            OrganizerDTO dto = organizer.AsDto();
+            return StatusCode(201, dto);
         }
 
         /// <summary>
@@ -56,15 +90,34 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">id not found</response>
         [HttpDelete]
         [Route("/organizer/{id}")]
-        public virtual IActionResult DeleteOrganizer([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id)
+        public virtual async Task<IActionResult> DeleteOrganizer([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id)
         {
+            Organizer? organizer = _helper.Validate(sessionToken);
+            // Validate session
+            if(organizer == null)
+            {
+                // invalid session
+                return StatusCode(404);
+            }
 
-            //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(204);
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
+            int Id = int.Parse(id);
 
-            throw new NotImplementedException();
+            // check if any planned or pending events exist
+            if(organizer.Events.Any(x => 
+                x.Status == (int)EventStatus.InFutureEnum
+                || x.Status == (int)EventStatus.PendingEnum))
+            {
+                return StatusCode(404);
+            }
+
+            // Hash all data of organizer
+            organizer.Name = organizer.Name.GetHashCode().ToString();
+            organizer.Email = organizer.Email.GetHashCode().ToString();
+
+            // save in db
+            await _context.SaveChangesAsync();
+
+            return StatusCode(204);
         }
 
         /// <summary>
@@ -76,21 +129,38 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">Invalid email/password supplied</response>
         [HttpGet]
         [Route("/organizer/login")]
-        public virtual IActionResult LoginOrganizer([FromQuery (Name = "email")][Required()]string email, [FromQuery (Name = "password")][Required()]string password)
+        public virtual async Task<IActionResult> LoginOrganizer([FromQuery (Name = "email")][Required()]string email, [FromQuery (Name = "password")][Required()]string password)
         {
+            // Check if organizer exists
+            Organizer? organizer = await _context.Organizers
+                                                 .FirstOrDefaultAsync(x =>
+                                                    string.Equals(x.Email, email)
+                                                    && x.Status == (int)Organizer.StatusEnum.ConfirmedEnum);
 
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(LoginOrganizer200Response));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            string exampleJson = null;
-            exampleJson = "{\r\n  \"sessionToken\" : \"sessionToken\"\r\n}";
-            
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<LoginOrganizer200Response>(exampleJson)
-            : default(LoginOrganizer200Response);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            // check if organizer with email exists
+            if (organizer == null
+                // check if valid password
+                || !string.Equals(organizer.Password, Extensions.EncryptPass(password)))
+            {
+                return StatusCode(400);
+            }
+
+            DateTime time = DateTime.Now;
+
+            // Create new session with token
+            Session session = new()
+            {
+                OrganizerId = organizer.Id,
+                Time = time,
+                Token = Session.GetToken(email, time),
+            };
+
+            // update db
+            await _context.Sessions.AddAsync(session);
+            await _context.SaveChangesAsync();
+
+            LoginOrganizer200ResponseDTO dto = session.AsDto();
+            return StatusCode(200, dto);
         }
 
         /// <summary>
@@ -104,7 +174,7 @@ namespace Org.OpenAPITools.Controllers
         [HttpPatch]
         [Route("/organizer/{id}")]
         [Consumes("application/json")]
-        public virtual IActionResult PatchOrganizer([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id, [FromBody]Organizer organizer)
+        public virtual IActionResult PatchOrganizer([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id, [FromBody]OrganizerDTO organizer)
         {
 
             //TODO: Uncomment the next line to return response 202 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -125,21 +195,69 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">organizer already exist</response>
         [HttpPost]
         [Route("/organizer")]
-        public virtual IActionResult SignUp([FromQuery (Name = "name")][Required()]string name, [FromQuery (Name = "email")][Required()]string email, [FromQuery (Name = "password")][Required()]string password)
+        public virtual async Task<IActionResult> SignUp([FromQuery (Name = "name")][Required()]string name, [FromQuery (Name = "email")][Required()]string email, [FromQuery (Name = "password")][Required()]string password)
         {
+            async Task GenerateEmailcode(DionizosDataContext _context, Organizer organizer)
+            {
+                // Create Email Code
+                Emailcode emailcode = new()
+                {
+                    OrganizerId = organizer.Id,
+                    Time = DateTime.Now,
+                    Code = string.Join(
+                        string.Empty,
+                        Enumerable.Range(0, 6)
+                                  .Select(_ => _random.Next(0, 9).ToString())
+                    ),
+                };
 
-            //TODO: Uncomment the next line to return response 201 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(201, default(Organizer));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            string exampleJson = null;
-            exampleJson = "{\r\n  \"password\" : \"12345\",\r\n  \"name\" : \"theUser\",\r\n  \"id\" : 10,\r\n  \"email\" : \"john@email.com\",\r\n  \"events\" : [ {\r\n    \"name\" : \"Long description of Event\",\r\n    \"freePlace\" : 2,\r\n    \"startTime\" : 1673034164,\r\n    \"id\" : 10,\r\n    \"endTime\" : 1683034164,\r\n    \"categories\" : [ {\r\n      \"name\" : \"Sport\",\r\n      \"id\" : 1\r\n    }, {\r\n      \"name\" : \"Sport\",\r\n      \"id\" : 1\r\n    } ],\r\n    \"title\" : \"Short description of Event\",\r\n    \"placeSchema\" : \"Seralized place schema\",\r\n    \"status\" : \"done\"\r\n  }, {\r\n    \"name\" : \"Long description of Event\",\r\n    \"freePlace\" : 2,\r\n    \"startTime\" : 1673034164,\r\n    \"id\" : 10,\r\n    \"endTime\" : 1683034164,\r\n    \"categories\" : [ {\r\n      \"name\" : \"Sport\",\r\n      \"id\" : 1\r\n    }, {\r\n      \"name\" : \"Sport\",\r\n      \"id\" : 1\r\n    } ],\r\n    \"title\" : \"Short description of Event\",\r\n    \"placeSchema\" : \"Seralized place schema\",\r\n    \"status\" : \"done\"\r\n  } ],\r\n  \"status\" : \"pending\"\r\n}";
-            
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<Organizer>(exampleJson)
-            : default(Organizer);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+                // Add email code to db
+                await _context.Emailcodes.AddAsync(emailcode);
+                await _context.SaveChangesAsync();
+
+                // TODO: (kutakw) send email with verification code + add to logs
+            };
+            /////////////////////////////////////////////////////////////////////////
+
+            // Check if organizer with that name or email already exists
+            Organizer? organizerInDb =
+                await _context.Organizers
+                              .FirstOrDefaultAsync(x => x.Name == name || x.Email == email);
+
+            if (organizerInDb != null)
+            {
+                if(organizerInDb.Status == (int)Organizer.StatusEnum.PendingEnum
+                    && organizerInDb.Name == name
+                    && organizerInDb.Email == email)
+                {
+                    // resend code via mail
+                    // gen email
+                    await GenerateEmailcode(_context, organizerInDb);
+
+                    return StatusCode(200, organizerInDb.AsDto());
+                }
+
+                // return bad request and no body
+                return StatusCode(400);
+            }
+
+            // Create new organizer
+            Organizer organizer = new()
+            {
+                Email = email,
+                Name = name,
+                Password = Extensions.EncryptPass(password),
+                Status = (int)Organizer.StatusEnum.PendingEnum,
+            };
+            // Add organizer to db
+            await _context.Organizers.AddAsync(organizer);
+            await _context.SaveChangesAsync();
+
+            // generate email
+            await GenerateEmailcode(_context, organizer);
+
+            OrganizerDTO dto = organizer.AsDto();
+            return StatusCode(201, dto);
         }
     }
 }

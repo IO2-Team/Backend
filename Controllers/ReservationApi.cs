@@ -63,8 +63,8 @@ namespace Org.OpenAPITools.Controllers
             exampleJson = "{\r\n  \"reservationToken\" : \"df0d69cbe68fb6e2b27aa88f6f94497e\",\r\n  \"eventId\" : 1,\r\n  \"placeId\" : 12\r\n}";
             
             var example = exampleJson != null
-            ? Newtonsoft.Json.JsonConvert.DeserializeObject<ReservationDTO>(exampleJson)
-            : default(ReservationDTO);
+            ? Newtonsoft.Json.JsonConvert.DeserializeObject<Reservation>(exampleJson)
+            : default(Reservation);
             //TODO: Change the data returned
             return new ObjectResult(example);
         }

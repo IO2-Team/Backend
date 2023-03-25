@@ -40,7 +40,7 @@ namespace Org.OpenAPITools.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class LoginOrganizer200Response {\n");
+            sb.Append("class LoginOrganizer200ResponseDTO {\n");
             sb.Append("  SessionToken: ").Append(SessionToken).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -68,9 +68,9 @@ namespace Org.OpenAPITools.Models
         }
 
         /// <summary>
-        /// Returns true if LoginOrganizer200Response instances are equal
+        /// Returns true if LoginOrganizer200ResponseDTO instances are equal
         /// </summary>
-        /// <param name="other">Instance of LoginOrganizer200Response to be compared</param>
+        /// <param name="other">Instance of LoginOrganizer200ResponseDTO to be compared</param>
         /// <returns>Boolean</returns>
         public bool Equals(LoginOrganizer200Response other)
         {

@@ -1,5 +1,6 @@
-﻿using dionizos_backend_app.Models;
+using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace dionizos_backend_app
 {
@@ -23,6 +24,8 @@ namespace dionizos_backend_app
             if (lastSession is null) return null;
             var mostRecentSession = _dionizosDataContext.Sessions
                 .Where( x=> x.Organizer == lastSession.Organizer)
+                .Include(x => x.Organizer)
+                .ThenInclude(x => x.Events)
                 .OrderBy(x => x.Time).Last();
             if (mostRecentSession.Id != lastSession.Id)
             {

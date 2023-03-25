@@ -1,5 +1,5 @@
 /*
- * System rezerwacji miejsc na eventy
+ * System rezerwacji miejsc na EventDTOy
  *
  * Niniejsza dokumentacja stanowi opis REST API implemtowanego przez serwer centralny. Endpointy 
  *
@@ -102,7 +102,7 @@ namespace Org.OpenAPITools.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class Event {\n");
+            sb.Append("class EventDTO {\n");
             sb.Append("  Id: ").Append(Id).Append("\n");
             sb.Append("  FreePlace: ").Append(FreePlace).Append("\n");
             sb.Append("  Title: ").Append(Title).Append("\n");
@@ -140,9 +140,9 @@ namespace Org.OpenAPITools.Models
         }
 
         /// <summary>
-        /// Returns true if Event instances are equal
+        /// Returns true if EventDTO instances are equal
         /// </summary>
-        /// <param name="other">Instance of Event to be compared</param>
+        /// <param name="other">Instance of EventDTO to be compared</param>
         /// <returns>Boolean</returns>
         public bool Equals(Event other)
         {

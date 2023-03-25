@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dionizos-backend-app", "dionizos-backend-app.csproj", "{8BC477A9-1514-42DF-86AD-7CA6FBACD88B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dionizos-backend-app", "dionizos-backend-app.csproj", "{8BC477A9-1514-42DF-86AD-7CA6FBACD88B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "..\Tests\Tests.csproj", "{DCC8ACD6-953C-4DB1-B72C-C90C585AA6BC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8BC477A9-1514-42DF-86AD-7CA6FBACD88B} = {8BC477A9-1514-42DF-86AD-7CA6FBACD88B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +20,10 @@ Global
 		{8BC477A9-1514-42DF-86AD-7CA6FBACD88B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BC477A9-1514-42DF-86AD-7CA6FBACD88B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BC477A9-1514-42DF-86AD-7CA6FBACD88B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCC8ACD6-953C-4DB1-B72C-C90C585AA6BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCC8ACD6-953C-4DB1-B72C-C90C585AA6BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCC8ACD6-953C-4DB1-B72C-C90C585AA6BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCC8ACD6-953C-4DB1-B72C-C90C585AA6BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

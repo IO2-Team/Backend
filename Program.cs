@@ -12,10 +12,11 @@ namespace dionizos_backend_app
         public static void Main(string[] args)
         {
             Prelaunch.GetSecrets();
+
             var configuration =  new ConfigurationBuilder()
                 .AddJsonFile($"appsettings.json");
             var config = configuration.Build();
-            
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.

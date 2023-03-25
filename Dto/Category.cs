@@ -17,7 +17,7 @@ namespace Org.OpenAPITools.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class Category : IEquatable<Category>
+    public partial class Category: IEquatable<Category>
     {
         /// <summary>
         /// Gets or Sets Id
@@ -38,7 +38,7 @@ namespace Org.OpenAPITools.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class Category {\n");
+            sb.Append("class CategoryDTO {\n");
             sb.Append("  Id: ").Append(Id).Append("\n");
             sb.Append("  Name: ").Append(Name).Append("\n");
             sb.Append("}\n");
@@ -67,9 +67,9 @@ namespace Org.OpenAPITools.Models
         }
 
         /// <summary>
-        /// Returns true if Category instances are equal
+        /// Returns true if CategoryDTO instances are equal
         /// </summary>
-        /// <param name="other">Instance of Category to be compared</param>
+        /// <param name="other">Instance of CategoryDTO to be compared</param>
         /// <returns>Boolean</returns>
         public bool Equals(Category other)
         {

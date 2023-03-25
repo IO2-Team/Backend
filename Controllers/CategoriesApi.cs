@@ -12,7 +12,6 @@ using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using dionizos_backend_app;
-using Category = Org.OpenAPITools.Models.Category;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -47,6 +46,7 @@ namespace Org.OpenAPITools.Controllers
             var organizer = _helper.Validate(sessionToken);
             if (organizer is null) return StatusCode(400);
             if (categoryName.Length < 2 || categoryName.Length > 250) return StatusCode(400);
+
 
             if (!_dionizosDataContext.Categories.Any( x => x.Name == categoryName))
             {
