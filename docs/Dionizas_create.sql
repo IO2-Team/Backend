@@ -36,7 +36,6 @@ CREATE TABLE Events (
     endTime timestamp  NOT NULL,
     latitude varchar(20)  NOT NULL,
     longitude varchar(20)  NOT NULL,
-    categories int  NOT NULL,
     status int  NOT NULL,
     placeCapacity int  NOT NULL,
     placeSchema text  NULL,

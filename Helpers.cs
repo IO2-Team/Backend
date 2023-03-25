@@ -1,31 +1,48 @@
-﻿using dionizos_backend_app.Models;
+using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace dionizos_backend_app
 {
+
     public interface IHelper
     {
-        public Task<bool> Validate(string sessionToken, TimeSpan sessionLength);
-        public int GetSessionLengthHours();
+        public Organizer? Validate(string sessionToken);
     }
     public class Helpers : IHelper
     {
-        private readonly DionizosDataContext _dionizosDataContext;
-        private readonly IConfigurationRoot _configurationRoot;
+        private DionizosDataContext _dionizosDataContext;
+        private IConfigurationRoot _configurationRoot;
         public Helpers(DionizosDataContext dionizosDataContext, IConfigurationRoot configurationRoot)
         {
             _dionizosDataContext = dionizosDataContext;
             _configurationRoot = configurationRoot;
         }
-        public async Task<bool> Validate(string sessionToken, TimeSpan sessionLength)
+        private Organizer? Validate(string sessionToken, TimeSpan sessionLength)
         {
-            return await _dionizosDataContext.Sessions.AnyAsync(x => x.Token == sessionToken && x.Time.ToUniversalTime() >= (DateTime.UtcNow - sessionLength));
+            var lastSession = _dionizosDataContext.Sessions.FirstOrDefault(x => x.Token == sessionToken);
+            if (lastSession is null) return null;
+            var mostRecentSession = _dionizosDataContext.Sessions
+                .Where( x=> x.Organizer == lastSession.Organizer)
+                .OrderBy(x => x.Time).Last();
+            if (mostRecentSession.Id != lastSession.Id)
+            {
+                return null;
+            }
+            if (mostRecentSession.Time.ToUniversalTime() < (DateTime.UtcNow - sessionLength))
+            {
+                return null;
+            }
+            return mostRecentSession.Organizer;
+        }
+        public Organizer? Validate(string sessionToken)
+        {
+            return Validate(sessionToken, TimeSpan.FromSeconds(GetSessionLengthSeconds()));
         }
 
-        public int GetSessionLengthHours()
+        private int GetSessionLengthSeconds()
         {
-            return int.Parse(_configurationRoot["SessionLengthHours"]);
+            return int.Parse(_configurationRoot["SessionLengthSeconds"]);
         }
+
     }
 }

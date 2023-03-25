@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -78,10 +78,8 @@ public partial class DionizosDataContext : DbContext
 
             entity.ToTable("events");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .UseIdentityAlwaysColumn();
-            entity.Property(e => e.Categories).HasColumnName("categories");
+            entity.Property(e => e.Id).HasColumnName("id");
+            
             entity.Property(e => e.Endtime)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("endtime");

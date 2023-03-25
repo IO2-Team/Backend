@@ -1,7 +1,9 @@
+using System.Runtime.CompilerServices;
 using dionizos_backend_app.Models;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using System;
 
 namespace dionizos_backend_app
 {
@@ -10,7 +12,8 @@ namespace dionizos_backend_app
         public static void Main(string[] args)
         {
             Prelaunch.GetSecrets();
-            var configuration = new ConfigurationBuilder()
+
+            var configuration =  new ConfigurationBuilder()
                 .AddJsonFile($"appsettings.json");
             var config = configuration.Build();
 
@@ -45,14 +48,14 @@ namespace dionizos_backend_app
             builder.Services.AddTransient<IHelper, Helpers>();
 
             var app = builder.Build();
-
+            
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
