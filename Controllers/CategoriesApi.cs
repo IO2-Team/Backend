@@ -31,6 +31,7 @@ namespace Org.OpenAPITools.Controllers
             _config = config;
             _helper = helper;
         }
+
         /// <summary>
         /// Create new category
         /// </summary>
@@ -40,45 +41,25 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">category already exist</response>
         [HttpPost]
         [Route("/categories")]
-        public virtual IActionResult AddCategories([FromHeader][Required()]string sessionToken, [FromQuery (Name = "categoryName")][Required()]string categoryName)
+        public virtual IActionResult AddCategories([FromHeader] [Required()] string sessionToken,
+            [FromQuery(Name = "categoryName")] [Required()] string categoryName)
         {
-
             //TODO: Uncomment the next line to return response 201 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(201, default(Category));
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(400);
-            string exampleJson = null;
-            exampleJson = "{\r\n  \"name\" : \"Sport\",\r\n  \"id\" : 1\r\n}";
-            
+            var organizer = _helper.Validate(sessionToken);
+            if (organizer is null) return StatusCode(400);
+            if (categoryName.Length < 2 || categoryName.Length > 250) return StatusCode(400);
 
-            int sessionLengthHours = _helper.GetSessionLengthHours();
-            if (_helper.Validate(sessionToken, TimeSpan.FromHours(sessionLengthHours)))
+            if (!_dionizosDataContext.Categories.Any( x => x.Name == categoryName))
             {
-                if (categoryName.Length > 1 && categoryName.Length <= 250)
-                {
-                    if (_dionizosDataContext.Categories.Find(categoryName) == null)
-                    {
-                        var cat = new dionizos_backend_app.Models.Category { Name = categoryName };
-                        _dionizosDataContext.Categories.Add(cat);
-                        _dionizosDataContext.SaveChanges();
-                        return StatusCode(201,cat);
-                    }
-                    else
-                    {
-                        return StatusCode(400);
-                    }
-                
-                }
-                else
-                {
-                    return StatusCode(400);
-                }
-                
+                var cat = new dionizos_backend_app.Models.Category { Name = categoryName };
+                _dionizosDataContext.Categories.Add(cat);
+                _dionizosDataContext.SaveChanges();
+                return StatusCode(201, cat);
             }
-            else
-            {
-                return StatusCode(400);
-            }
+            return StatusCode(400);
         }
 
         /// <summary>

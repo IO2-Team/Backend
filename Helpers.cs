@@ -6,8 +6,7 @@ namespace dionizos_backend_app
 
     public interface IHelper
     {
-        public bool Validate(string sessionToken, TimeSpan sessionLength);
-        public int GetSessionLengthHours();
+        public Organizer? Validate(string sessionToken);
     }
     public class Helpers : IHelper
     {
@@ -18,15 +17,32 @@ namespace dionizos_backend_app
             _dionizosDataContext = dionizosDataContext;
             _configurationRoot = configurationRoot;
         }
-        public bool Validate(string sessionToken, TimeSpan sessionLength)
+        private Organizer? Validate(string sessionToken, TimeSpan sessionLength)
         {
-            return _dionizosDataContext.Sessions.Count(x => x.Token == sessionToken && x.Time.ToUniversalTime() >= (DateTime.UtcNow - sessionLength)) > 0;
-
+            var lastSession = _dionizosDataContext.Sessions.FirstOrDefault(x => x.Token == sessionToken);
+            if (lastSession is null) return null;
+            var mostRecentSession = _dionizosDataContext.Sessions
+                .Where( x=> x.Organizer == lastSession.Organizer)
+                .OrderBy(x => x.Time).Last();
+            if (mostRecentSession.Id != lastSession.Id)
+            {
+                return null;
+            }
+            if (mostRecentSession.Time.ToUniversalTime() < (DateTime.UtcNow - sessionLength))
+            {
+                return null;
+            }
+            return mostRecentSession.Organizer;
+        }
+        public Organizer? Validate(string sessionToken)
+        {
+            return Validate(sessionToken, TimeSpan.FromSeconds(GetSessionLengthSeconds()));
         }
 
-        public int GetSessionLengthHours()
+        private int GetSessionLengthSeconds()
         {
-            return int.Parse(_configurationRoot["SessionLengthHours"]);
+            return int.Parse(_configurationRoot["SessionLengthSeconds"]);
         }
+
     }
 }

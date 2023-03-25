@@ -9,9 +9,14 @@
  */
 
 using System.ComponentModel.DataAnnotations;
+using dionizos_backend_app;
+using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
+using Category = Org.OpenAPITools.Models.Category;
+using Event = Org.OpenAPITools.Models.Event;
+using Organizer = dionizos_backend_app.Models.Organizer;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -21,6 +26,13 @@ namespace Org.OpenAPITools.Controllers
     [ApiController]
     public class EventApiController : ControllerBase
     {
+        DionizosDataContext _dionizosDataContext;
+        IHelper _helper;
+        public EventApiController(DionizosDataContext dionizosDataContext, IHelper helper)
+        {
+            _dionizosDataContext = dionizosDataContext;
+            _helper = helper;
+        }
         /// <summary>
         /// Add new event
         /// </summary>
@@ -46,12 +58,37 @@ namespace Org.OpenAPITools.Controllers
             // return StatusCode(400);
             string exampleJson = null;
             exampleJson = "{\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of Event\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of Event\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}";
+            var organizer = _helper.Validate(sessionToken);
+            if (organizer is null) return StatusCode(400);
+            if (title.Length == 0 || title.Length > 250 || latitude.Length == 0 || latitude.Length > 20 ||
+                longitude.Length == 0 || longitude.Length < 20) return StatusCode(400);
+            if (categories is not null)
+            {
+                int exisitng_categories_cnt =  _dionizosDataContext.Categories.Where(c => categories.Contains(c.Id)).Count();
+                if (exisitng_categories_cnt == categories.Count)
+                {
+                    return StatusCode(400);
+                }
+            }
 
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<Event>(exampleJson)
-            : default(Event);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            if (freePlace is not null  && freePlace <= 0 )return StatusCode(400);
+
+            if (startTime is not null)
+            {
+                if (startTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) return StatusCode(400);
+                if (endTime is not null && endTime >= startTime) return StatusCode(400);
+            }
+
+            if (endTime is not null && endTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds())return StatusCode(400);
+
+                dionizos_backend_app.Models.Event newEvent = new dionizos_backend_app.Models.Event();
+            //newEvent.Categories = categories is null ? new List<Category>() : categories;
+            //newEvent.Endtime = endTime;
+
+            //dodanie kategorii
+            //_dionizosDataContext.Events.Add(newEvent);
+            //return StatusCode(200, newEvent);
+            return StatusCode(400);
         }
 
         /// <summary>
