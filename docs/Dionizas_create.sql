@@ -31,7 +31,7 @@ CREATE TABLE Events (
     id Serial  NOT NULL,
     owner int  NOT NULL,
     title varchar(250)  NOT NULL,
-    name int  NULL,
+    name varchar(250)  NULL,
     startTime timestamp  NOT NULL,
     endTime timestamp  NOT NULL,
     latitude varchar(20)  NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE Events (
     categories int  NOT NULL,
     status int  NOT NULL,
     placeCapacity int  NOT NULL,
-    placeSchema int  NULL,
+    placeSchema text  NULL,
     CONSTRAINT id PRIMARY KEY (id)
 );
 
