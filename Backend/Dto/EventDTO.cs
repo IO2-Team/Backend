@@ -24,7 +24,7 @@ namespace Org.OpenAPITools.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class Event : IEquatable<Event>
+    public partial class EventDTO : IEquatable<EventDTO>
     {
         /// <summary>
         /// Gets or Sets Id
@@ -93,7 +93,7 @@ namespace Org.OpenAPITools.Models
         /// Gets or Sets Categories
         /// </summary>
         [DataMember(Name="categories", EmitDefaultValue=false)]
-        public List<Category> Categories { get; set; }
+        public List<CategoryDTO> Categories { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,7 +136,7 @@ namespace Org.OpenAPITools.Models
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((Event)obj);
+            return obj.GetType() == GetType() && Equals((EventDTO)obj);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Org.OpenAPITools.Models
         /// </summary>
         /// <param name="other">Instance of EventDTO to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(Event other)
+        public bool Equals(EventDTO other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -247,12 +247,12 @@ namespace Org.OpenAPITools.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(Event left, Event right)
+        public static bool operator ==(EventDTO left, EventDTO right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(Event left, Event right)
+        public static bool operator !=(EventDTO left, EventDTO right)
         {
             return !Equals(left, right);
         }

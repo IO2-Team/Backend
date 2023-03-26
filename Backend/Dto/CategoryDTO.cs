@@ -17,7 +17,7 @@ namespace Org.OpenAPITools.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class Category: IEquatable<Category>
+    public partial class CategoryDTO: IEquatable<CategoryDTO>
     {
         /// <summary>
         /// Gets or Sets Id
@@ -63,7 +63,7 @@ namespace Org.OpenAPITools.Models
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((Category)obj);
+            return obj.GetType() == GetType() && Equals((CategoryDTO)obj);
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Org.OpenAPITools.Models
         /// </summary>
         /// <param name="other">Instance of CategoryDTO to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(Category other)
+        public bool Equals(CategoryDTO other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -110,12 +110,12 @@ namespace Org.OpenAPITools.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(Category left, Category right)
+        public static bool operator ==(CategoryDTO left, CategoryDTO right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(Category left, Category right)
+        public static bool operator !=(CategoryDTO left, CategoryDTO right)
         {
             return !Equals(left, right);
         }

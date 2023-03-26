@@ -24,7 +24,7 @@ namespace Org.OpenAPITools.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class Reservation : IEquatable<Reservation>
+    public partial class ReservationDTO : IEquatable<ReservationDTO>
     {
         /// <summary>
         /// Gets or Sets EventId
@@ -77,7 +77,7 @@ namespace Org.OpenAPITools.Models
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((Reservation)obj);
+            return obj.GetType() == GetType() && Equals((ReservationDTO)obj);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Org.OpenAPITools.Models
         /// </summary>
         /// <param name="other">Instance of ReservationDTO to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(Reservation other)
+        public bool Equals(ReservationDTO other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -131,12 +131,12 @@ namespace Org.OpenAPITools.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(Reservation left, Reservation right)
+        public static bool operator ==(ReservationDTO left, ReservationDTO right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(Reservation left, Reservation right)
+        public static bool operator !=(ReservationDTO left, ReservationDTO right)
         {
             return !Equals(left, right);
         }

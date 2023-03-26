@@ -24,7 +24,7 @@ namespace Org.OpenAPITools.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class Organizer : IEquatable<Organizer>
+    public partial class OrganizerDTO : IEquatable<OrganizerDTO>
     {
         /// <summary>
         /// Gets or Sets Id
@@ -54,7 +54,7 @@ namespace Org.OpenAPITools.Models
         /// Gets or Sets Events
         /// </summary>
         [DataMember(Name="events", EmitDefaultValue=false)]
-        public List<Event> Events { get; set; }
+        public List<EventDTO> Events { get; set; }
 
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace Org.OpenAPITools.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class Organizer {\n");
+            sb.Append("class OrganizerDTO {\n");
             sb.Append("  Id: ").Append(Id).Append("\n");
             sb.Append("  Name: ").Append(Name).Append("\n");
             sb.Append("  Email: ").Append(Email).Append("\n");
@@ -122,15 +122,15 @@ namespace Org.OpenAPITools.Models
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((Organizer)obj);
+            return obj.GetType() == GetType() && Equals((OrganizerDTO)obj);
         }
 
         /// <summary>
-        /// Returns true if Organizer instances are equal
+        /// Returns true if OrganizerDTO instances are equal
         /// </summary>
-        /// <param name="other">Instance of Organizer to be compared</param>
+        /// <param name="other">Instance of OrganizerDTO to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(Organizer other)
+        public bool Equals(OrganizerDTO other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -198,12 +198,12 @@ namespace Org.OpenAPITools.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(Organizer left, Organizer right)
+        public static bool operator ==(OrganizerDTO left, OrganizerDTO right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(Organizer left, Organizer right)
+        public static bool operator !=(OrganizerDTO left, OrganizerDTO right)
         {
             return !Equals(left, right);
         }

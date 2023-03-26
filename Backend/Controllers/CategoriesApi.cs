@@ -12,6 +12,8 @@ using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using dionizos_backend_app;
+using dionizos_backend_app.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -40,7 +42,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">category already exist</response>
         [HttpPost]
         [Route("/categories")]
-        public virtual IActionResult AddCategories([FromHeader] [Required()] string sessionToken,
+        public virtual async Task<IActionResult> AddCategories([FromHeader] [Required()] string sessionToken,
             [FromQuery(Name = "categoryName")] [Required()] string categoryName)
         {
             var organizer = _helper.Validate(sessionToken);
@@ -50,10 +52,10 @@ namespace Org.OpenAPITools.Controllers
 
             if (!_dionizosDataContext.Categories.Any( x => x.Name == categoryName))
             {
-                var cat = new dionizos_backend_app.Models.Category { Name = categoryName };
-                _dionizosDataContext.Categories.Add(cat);
-                _dionizosDataContext.SaveChanges();
-                return StatusCode(201, cat);
+                Category cat = new Category { Name = categoryName };
+                await _dionizosDataContext.Categories.AddAsync(cat);
+                await _dionizosDataContext.SaveChangesAsync();
+                return StatusCode(201, cat.AsDto());
             }
             return StatusCode(400);
         }
@@ -64,9 +66,11 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="200">successful operation</response>
         [HttpGet]
         [Route("/categories")]
-        public virtual IActionResult GetCategories()
+        public virtual async Task<IActionResult> GetCategories()
         {
-            return new ObjectResult(_dionizosDataContext.Categories.ToList());
+            var categories = _dionizosDataContext.Categories.Select(x => x.AsDto())
+                                                            .ToListAsync();
+            return new ObjectResult(categories);
         }
     }
 }

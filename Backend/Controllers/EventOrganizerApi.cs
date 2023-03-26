@@ -16,13 +16,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
-using OrganizerDTO = Org.OpenAPITools.Models.Organizer;
-using Organizer = dionizos_backend_app.Models.Organizer;
-using EventDTO = Org.OpenAPITools.Models.Event;
-using Event = dionizos_backend_app.Models.Event;
-using CategoryDTO = Org.OpenAPITools.Models.Category;
-using Category = dionizos_backend_app.Models.Category;
-using LoginOrganizer200ResponseDTO = Org.OpenAPITools.Models.LoginOrganizer200Response;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -45,7 +38,7 @@ namespace Org.OpenAPITools.Controllers
         /// <summary>
         /// Confirm orginizer account
         /// </summary>
-        /// <param name="id">id of Organizer</param>
+        /// <param name="id">id of OrganizerDTO</param>
         /// <param name="code">code from email</param>
         /// <response code="201">account confirmed</response>
         /// <response code="400">code wrong</response>
@@ -90,7 +83,7 @@ namespace Org.OpenAPITools.Controllers
         /// Confirm orginizer account
         /// </summary>
         /// <param name="sessionToken">session Token</param>
-        /// <param name="id">id of Organizer</param>
+        /// <param name="id">id of OrganizerDTO</param>
         /// <response code="204">deleted</response>
         /// <response code="404">id not found</response>
         [HttpDelete]
@@ -118,6 +111,8 @@ namespace Org.OpenAPITools.Controllers
             // Hash all data of organizer
             organizer.Name = organizer.Name.GetHashCode().ToString();
             organizer.Email = organizer.Email.GetHashCode().ToString();
+
+            // TODO: make him deleted.
 
             // save in db
             await _context.SaveChangesAsync();
@@ -164,7 +159,7 @@ namespace Org.OpenAPITools.Controllers
             await _context.Sessions.AddAsync(session);
             await _context.SaveChangesAsync();
 
-            LoginOrganizer200ResponseDTO dto = session.AsDto();
+            SessionResponse dto = session.AsDto();
             return StatusCode(200, dto);
         }
 
@@ -172,7 +167,7 @@ namespace Org.OpenAPITools.Controllers
         /// Patch orginizer account
         /// </summary>
         /// <param name="sessionToken">session Token</param>
-        /// <param name="id">id of Organizer</param>
+        /// <param name="id">id of OrganizerDTO</param>
         /// <param name="organizer">Update an existent user in the store</param>
         /// <response code="202">patched</response>
         /// <response code="404">id not found</response>
@@ -193,9 +188,9 @@ namespace Org.OpenAPITools.Controllers
         /// <summary>
         /// Create orginizer account
         /// </summary>
-        /// <param name="name">name of Organizer</param>
-        /// <param name="email">email of Organizer</param>
-        /// <param name="password">password of Organizer</param>
+        /// <param name="name">name of OrganizerDTO</param>
+        /// <param name="email">email of OrganizerDTO</param>
+        /// <param name="password">password of OrganizerDTO</param>
         /// <response code="201">successful operation</response>
         /// <response code="400">organizer already exist</response>
         [HttpPost]
