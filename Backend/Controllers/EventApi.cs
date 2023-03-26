@@ -15,11 +15,6 @@ using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
-using Category = Org.OpenAPITools.Models.Category;
-using Event = dionizos_backend_app.Models.Event;
-using EventDTO = Org.OpenAPITools.Models.Event;
-using EventStatus = Org.OpenAPITools.Models.EventStatus;
-using Organizer = dionizos_backend_app.Models.Organizer;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -40,8 +35,8 @@ namespace Org.OpenAPITools.Controllers
         /// Add new event
         /// </summary>
         /// <param name="sessionToken">session Token</param>
-        /// <param name="title">title of Event</param>
-        /// <param name="name">title of Event</param>
+        /// <param name="title">title of EventDTO</param>
+        /// <param name="name">title of EventDTO</param>
         /// <param name="freePlace">No of free places</param>
         /// <param name="startTime">Unix time stamp of begin of event</param>
         /// <param name="endTime">Unix time stamp of end of event</param>
@@ -80,15 +75,12 @@ namespace Org.OpenAPITools.Controllers
             newEvent.Endtime = DateTimeOffset.FromUnixTimeSeconds((long)endTime).DateTime;
             newEvent.Placecapacity = (int)freePlace;
             newEvent.Status = (int)EventStatus.InFutureEnum;
-            //newEvent.OwnerNavigation = organizer; //czy to trzeba uzupelnic?
             newEvent.Placeschema = placeSchema ?? "";
 
             await _dionizosDataContext.Events.AddAsync(newEvent);
             await _dionizosDataContext.SaveChangesAsync(); //aby uzyskac id eventu
 
-            //newEvent.Eventincategories;
             //add categories table
-            //foreach (dionizos_backend_app.Models.Category category in _dionizosDataContext.Categories.Where(x => categories.Contains(x.Id)).ToArray())
             foreach (var category in categories)
             {
                 Eventincategory eventincategory = new Eventincategory();
@@ -98,9 +90,6 @@ namespace Org.OpenAPITools.Controllers
             }
 
             await _dionizosDataContext.SaveChangesAsync();
-
-
-            //newEvent.Eventincategories; //czy uzupelniane automatucznie
             EventDTO dto = newEvent.AsDto();
             return StatusCode(200, dto);
         }
@@ -109,7 +98,7 @@ namespace Org.OpenAPITools.Controllers
         /// Cancel event
         /// </summary>
         /// <param name="sessionToken">session Token</param>
-        /// <param name="id">id of Event</param>
+        /// <param name="id">id of EventDTO</param>
         /// <response code="204">deleted</response>
         /// <response code="404">id not found</response>
         [HttpDelete]
@@ -137,11 +126,11 @@ namespace Org.OpenAPITools.Controllers
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(List<Event>));
+            // return StatusCode(200, default(List<EventDTO>));
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(400);
             string exampleJson = null;
-            exampleJson = "[ {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of Event\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of Event\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}, {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of Event\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of Event\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n} ]";
+            exampleJson = "[ {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}, {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n} ]";
 
             var example = exampleJson != null
             ? JsonConvert.DeserializeObject<List<Event>>(exampleJson)
@@ -157,20 +146,20 @@ namespace Org.OpenAPITools.Controllers
         /// <param name="id">ID of event to return</param>
         /// <response code="200">successful operation</response>
         /// <response code="400">Invalid ID supplied</response>
-        /// <response code="404">Event not found</response>
+        /// <response code="404">EventDTO not found</response>
         [HttpGet]
         [Route("/events/{id}")]
         public virtual IActionResult GetEventById([FromRoute (Name = "id")][Required]long id)
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(Event));
+            // return StatusCode(200, default(EventDTO));
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(400);
             //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(404);
             string exampleJson = null;
-            exampleJson = "{\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of Event\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of Event\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}";
+            exampleJson = "{\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}";
 
             var example = exampleJson != null
             ? JsonConvert.DeserializeObject<Event>(exampleJson)
@@ -189,9 +178,9 @@ namespace Org.OpenAPITools.Controllers
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(List<Event>));
+            // return StatusCode(200, default(List<EventDTO>));
             string exampleJson = null;
-            exampleJson = "[ {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of Event\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of Event\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}, {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of Event\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of Event\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n} ]";
+            exampleJson = "[ {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}, {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n} ]";
 
             var example = exampleJson != null
             ? JsonConvert.DeserializeObject<List<Event>>(exampleJson)
@@ -211,9 +200,9 @@ namespace Org.OpenAPITools.Controllers
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(List<Event>));
+            // return StatusCode(200, default(List<EventDTO>));
             string exampleJson = null;
-            exampleJson = "[ {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of Event\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of Event\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}, {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of Event\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of Event\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n} ]";
+            exampleJson = "[ {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}, {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n} ]";
 
             var example = exampleJson != null
             ? JsonConvert.DeserializeObject<List<Event>>(exampleJson)
@@ -226,7 +215,7 @@ namespace Org.OpenAPITools.Controllers
         /// patch existing event
         /// </summary>
         /// <param name="sessionToken">session Token</param>
-        /// <param name="id">id of Event</param>
+        /// <param name="id">id of EventDTO</param>
         /// <param name="_event">Update an existent user in the store</param>
         /// <response code="202">patched</response>
         /// <response code="404">id not found</response>

@@ -4,13 +4,6 @@ using Microsoft.OpenApi.Models;
 using Org.OpenAPITools.Models;
 using System.Security.Cryptography;
 using System.Text;
-using OrganizerDTO = Org.OpenAPITools.Models.Organizer;
-using Organizer = dionizos_backend_app.Models.Organizer;
-using EventDTO = Org.OpenAPITools.Models.Event;
-using Event = dionizos_backend_app.Models.Event;
-using CategoryDTO = Org.OpenAPITools.Models.Category;
-using Category = dionizos_backend_app.Models.Category;
-using LoginOrganizer200ResponseDTO = Org.OpenAPITools.Models.LoginOrganizer200Response;
 
 namespace dionizos_backend_app.Extensions
 {
@@ -64,9 +57,9 @@ namespace dionizos_backend_app.Extensions
             };
         }
 
-        public static LoginOrganizer200ResponseDTO AsDto(this Session session)
+        public static SessionResponse AsDto(this Session session)
         {
-            return new LoginOrganizer200ResponseDTO()
+            return new SessionResponse()
             {
                 SessionToken = session.Token,
             };
