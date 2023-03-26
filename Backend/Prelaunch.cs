@@ -24,7 +24,7 @@ namespace dionizos_backend_app
             );
 
             KeyVaultSecret POSTGRES_CONNSTRING = client.GetSecret("POSTGRES-CONNSTRING-TSC").Value;
-            KeyVaultSecret COMMUNICATIONS_CONNSTRING =  client.GetSecret("COMMUNICATIONS-CONNSTRING").Value;
+            KeyVaultSecret COMMUNICATIONS_CONNSTRING =  client.GetSecret("COMMUNICATIONS-CONNSTRING-2").Value;
             KeyVaultSecret BLOB_CONNSTRING =  client.GetSecret("BLOB-CONNSTRING").Value;
 
             string postgres = POSTGRES_CONNSTRING.Value;
