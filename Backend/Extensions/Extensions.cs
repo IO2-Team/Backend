@@ -45,6 +45,8 @@ namespace dionizos_backend_app.Extensions
                                     .Where(x => x.EventId == ev.Id)
                                     .Select(x => x.Categories.AsDto())
                                     .ToList(),
+                Latitude = ev.Latitude,
+                Longitude = ev.Longitude
             };
         }
 

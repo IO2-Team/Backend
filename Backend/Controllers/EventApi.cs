@@ -13,6 +13,7 @@ using dionizos_backend_app;
 using dionizos_backend_app.Extensions;
 using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
 
@@ -122,21 +123,13 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">Invalid category ID supplied</response>
         [HttpGet]
         [Route("/events/getByCategory")]
-        public virtual IActionResult GetByCategory([FromQuery (Name = "categoryId")][Required()]long categoryId)
+        public virtual async Task<IActionResult> GetByCategory([FromQuery (Name = "categoryId")][Required()]long categoryId)
         {
 
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(List<EventDTO>));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            string exampleJson = null;
-            exampleJson = "[ {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}, {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n} ]";
-
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Event>>(exampleJson)
-            : default(List<Event>);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            List<Eventincategory> eInC = await _dionizosDataContext.Eventincategories.Include(x => x.Event)
+                                                                                     .Where(x => x.CategoriesId == categoryId)
+                                                                                     .ToListAsync();
+            return new ObjectResult(eInC.Select(x => x.Event.AsDto()).ToList());
         }
 
         /// <summary>
@@ -149,23 +142,14 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">EventDTO not found</response>
         [HttpGet]
         [Route("/events/{id}")]
-        public virtual IActionResult GetEventById([FromRoute (Name = "id")][Required]long id)
+        public virtual async Task<IActionResult> GetEventById([FromRoute (Name = "id")][Required]long id)
         {
+            if (id < 1) return StatusCode(400);
 
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(EventDTO));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
-            string exampleJson = null;
-            exampleJson = "{\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}";
 
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<Event>(exampleJson)
-            : default(Event);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            Event? e = await _dionizosDataContext.Events.FirstOrDefaultAsync(x => x.Id == id);
+            if(e is null) StatusCode(404);
+            return new ObjectResult(e.AsDto());
         }
 
         /// <summary>
@@ -174,19 +158,10 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="200">successful operation</response>
         [HttpGet]
         [Route("/events")]
-        public virtual IActionResult GetEvents()
+        public virtual async Task<IActionResult> GetEvents()
         {
-
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(List<EventDTO>));
-            string exampleJson = null;
-            exampleJson = "[ {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}, {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n} ]";
-
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Event>>(exampleJson)
-            : default(List<Event>);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            List<EventDTO> events = _dionizosDataContext.Events.Select(x => x.AsDto()).ToList();
+            return new ObjectResult(events);
         }
 
         /// <summary>
@@ -196,19 +171,15 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="200">successful operation</response>
         [HttpGet]
         [Route("/events/my")]
-        public virtual IActionResult GetMyEvents([FromHeader][Required()]string sessionToken)
+        public virtual async Task<IActionResult> GetMyEvents([FromHeader][Required()]string sessionToken)
         {
 
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(List<EventDTO>));
-            string exampleJson = null;
-            exampleJson = "[ {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n}, {\n  \"latitude\" : \"40.4775315\",\n  \"name\" : \"Long description of EventDTO\",\n  \"freePlace\" : 2,\n  \"startTime\" : 1673034164,\n  \"id\" : 10,\n  \"endTime\" : 1683034164,\n  \"categories\" : [ {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  }, {\n    \"name\" : \"Sport\",\n    \"id\" : 1\n  } ],\n  \"title\" : \"Short description of EventDTO\",\n  \"longitude\" : \"-3.7051359\",\n  \"placeSchema\" : \"Seralized place schema\",\n  \"status\" : \"done\"\n} ]";
+            var organizer = _helper.Validate(sessionToken);
+            if (organizer is null) return StatusCode(400);
 
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<Event>>(exampleJson)
-            : default(List<Event>);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            List<EventDTO> events = await _dionizosDataContext.Events.Where(x => x.Owner == organizer.Id)
+                                                                     .Select(x => x.AsDto()).ToListAsync();
+            return new ObjectResult(events);
         }
 
         /// <summary>

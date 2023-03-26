@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using dionizos_backend_app;
 using dionizos_backend_app.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -67,7 +68,8 @@ namespace Org.OpenAPITools.Controllers
         [Route("/categories")]
         public virtual async Task<IActionResult> GetCategories()
         {
-            var categories = _dionizosDataContext.Categories.Select(x => x.AsDto()).ToList();
+            var categories = _dionizosDataContext.Categories.Select(x => x.AsDto())
+                                                            .ToListAsync();
             return new ObjectResult(categories);
         }
     }
