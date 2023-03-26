@@ -6,6 +6,7 @@ namespace dionizos_backend_app
     public interface IMailing
     {
         public Response<EmailSendResult>  SendEmail(List<EmailAddress> recipients, string htmlEmailContent, string emailTitle);
+        public Response<EmailSendResult> SendEmailCode(string email, string code, string? displayName = null);
     }
     public class Mailing: IMailing
     {
@@ -25,6 +26,13 @@ namespace dionizos_backend_app
             var emailResult = emailClient.Send(WaitUntil.Started,emailMessage, CancellationToken.None);
             var result = emailResult.WaitForCompletionAsync();
             return result.Result;
+        }
+
+        public Response<EmailSendResult> SendEmailCode(string email, string code, string? displayName = null)
+        {
+            var list = new List<EmailAddress> { new EmailAddress(email, displayName ?? email) };
+            string body = "Welcome in Dionizos. Your code is: " + code;
+            return SendEmail(list,body, "Dionizos - Activation Code");
         }
     }
 }
