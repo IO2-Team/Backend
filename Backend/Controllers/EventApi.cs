@@ -125,7 +125,7 @@ namespace Org.OpenAPITools.Controllers
         [Route("/events/getByCategory")]
         public virtual async Task<IActionResult> GetByCategory([FromQuery (Name = "categoryId")][Required()]long categoryId)
         {
-
+            if (categoryId < 1) return StatusCode(400);
             List<Eventincategory> eInC = await _dionizosDataContext.Eventincategories.Include(x => x.Event)
                                                                                      .Where(x => x.CategoriesId == categoryId)
                                                                                      .ToListAsync();
@@ -148,7 +148,7 @@ namespace Org.OpenAPITools.Controllers
 
 
             Event? e = await _dionizosDataContext.Events.FirstOrDefaultAsync(x => x.Id == id);
-            if(e is null) StatusCode(404);
+            if(e is null) return StatusCode(404);
             return new ObjectResult(e.AsDto());
         }
 
