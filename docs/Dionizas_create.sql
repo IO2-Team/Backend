@@ -1,5 +1,4 @@
--- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2023-03-07 19:02:54.689
+-- Last modification date: 2023-03-27
 
 -- tables
 -- Table: Categories
@@ -31,7 +30,7 @@ CREATE TABLE Events (
     id Serial  NOT NULL,
     owner int  NOT NULL,
     title varchar(250)  NOT NULL,
-    name varchar(250)  NULL,
+    name text  NULL,
     startTime timestamp  NOT NULL,
     endTime timestamp  NOT NULL,
     latitude varchar(20)  NOT NULL,

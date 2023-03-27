@@ -90,7 +90,6 @@ public partial class DionizosDataContext : DbContext
                 .HasMaxLength(20)
                 .HasColumnName("longitude");
             entity.Property(e => e.Name)
-                .HasMaxLength(250)
                 .HasColumnName("name");
             entity.Property(e => e.Owner).HasColumnName("owner");
             entity.Property(e => e.Placecapacity).HasColumnName("placecapacity");
