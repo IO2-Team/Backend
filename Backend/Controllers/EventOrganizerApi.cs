@@ -27,12 +27,14 @@ namespace Org.OpenAPITools.Controllers
     {
         private readonly DionizosDataContext _context;
         private readonly IHelper _helper;
+        private readonly IMailing _mailing;
         private readonly Random _random = new();
 
-        public EventOrganizerApiController(DionizosDataContext context, IHelper helper)
+        public EventOrganizerApiController(DionizosDataContext context, IHelper helper, IMailing mailing)
         {
             _context = context;
             _helper = helper;
+            _mailing = mailing;
         }
 
         /// <summary>
@@ -215,7 +217,9 @@ namespace Org.OpenAPITools.Controllers
                 await _context.Emailcodes.AddAsync(emailcode);
                 await _context.SaveChangesAsync();
 
-                // TODO: (kutakw) send email with verification code + add to logs
+                _mailing.SendEmailCode(organizer.Email, emailcode.Code);
+
+                // TODO: add to logs
             };
             /////////////////////////////////////////////////////////////////////////
 
