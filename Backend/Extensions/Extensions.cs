@@ -33,6 +33,7 @@ namespace dionizos_backend_app.Extensions
             return new EventDTO()
             {
                 Id = ev.Id,
+                MaxPlace = ev.Placecapacity,
                 FreePlace = ev.Placecapacity - context.Reservatons.Count(x => x.EventId == ev.Id),
                 Title = ev.Title,
                 StartTime = ((DateTimeOffset)ev.Starttime).ToUnixTimeSeconds(),
@@ -46,7 +47,9 @@ namespace dionizos_backend_app.Extensions
                                     .Select(x => x.Categories.AsDto())
                                     .ToList(),
                 Latitude = ev.Latitude,
-                Longitude = ev.Longitude
+                Longitude = ev.Longitude,
+                //TODO: add after db change
+                Places = new List<PlaceDTO>()
             };
         }
 

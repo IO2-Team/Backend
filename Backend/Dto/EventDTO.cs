@@ -17,6 +17,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Converters;
+using dionizos_backend_app.Models;
 
 namespace Org.OpenAPITools.Models
 {
@@ -30,70 +31,93 @@ namespace Org.OpenAPITools.Models
         /// Gets or Sets Id
         /// </summary>
         [Required]
-        [DataMember(Name="id", EmitDefaultValue=true)]
-        public long Id { get; set; }
 
-        /// <summary>
-        /// Gets or Sets FreePlace
-        /// </summary>
-        [DataMember(Name="freePlace", EmitDefaultValue=true)]
-        public long FreePlace { get; set; }
+        [DataMember(Name = "id")]
+        public long? Id { get; set; }
 
         /// <summary>
         /// Gets or Sets Title
         /// </summary>
-        [DataMember(Name="title", EmitDefaultValue=false)]
+
+        [DataMember(Name = "title")]
         public string Title { get; set; }
 
         /// <summary>
         /// Gets or Sets StartTime
         /// </summary>
-        [DataMember(Name="startTime", EmitDefaultValue=true)]
-        public long StartTime { get; set; }
+
+        [DataMember(Name = "startTime")]
+        public long? StartTime { get; set; }
 
         /// <summary>
         /// Gets or Sets EndTime
         /// </summary>
-        [DataMember(Name="endTime", EmitDefaultValue=true)]
-        public long EndTime { get; set; }
+
+        [DataMember(Name = "endTime")]
+        public long? EndTime { get; set; }
 
         /// <summary>
         /// Gets or Sets Latitude
         /// </summary>
 
-        [DataMember(Name="latitude", EmitDefaultValue = false)]
+        [DataMember(Name = "latitude")]
         public string Latitude { get; set; }
 
         /// <summary>
         /// Gets or Sets Longitude
         /// </summary>
 
-        [DataMember(Name="longitude", EmitDefaultValue = false)]
+        [DataMember(Name = "longitude")]
         public string Longitude { get; set; }
 
         /// <summary>
         /// Gets or Sets Name
         /// </summary>
-        [DataMember(Name="name", EmitDefaultValue=false)]
+
+        [DataMember(Name = "name")]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or Sets PlaceSchema
         /// </summary>
-        [DataMember(Name="placeSchema", EmitDefaultValue=false)]
+
+        [DataMember(Name = "placeSchema")]
         public string PlaceSchema { get; set; }
 
         /// <summary>
         /// Gets or Sets Status
         /// </summary>
-        [DataMember(Name="status", EmitDefaultValue=true)]
+
+        [DataMember(Name = "status")]
         public EventStatus Status { get; set; }
 
         /// <summary>
         /// Gets or Sets Categories
         /// </summary>
-        [DataMember(Name="categories", EmitDefaultValue=false)]
+
+        [DataMember(Name = "categories")]
         public List<CategoryDTO> Categories { get; set; }
+
+        /// <summary>
+        /// Gets or Sets FreePlace
+        /// </summary>
+
+        [DataMember(Name = "freePlace")]
+        public long? FreePlace { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MaxPlace
+        /// </summary>
+
+        [DataMember(Name = "maxPlace")]
+        public long? MaxPlace { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Places
+        /// </summary>
+
+        [DataMember(Name = "places")]
+        public List<PlaceDTO> Places { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -102,9 +126,8 @@ namespace Org.OpenAPITools.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class EventDTO {\n");
+            sb.Append("class ModelEvent {\n");
             sb.Append("  Id: ").Append(Id).Append("\n");
-            sb.Append("  FreePlace: ").Append(FreePlace).Append("\n");
             sb.Append("  Title: ").Append(Title).Append("\n");
             sb.Append("  StartTime: ").Append(StartTime).Append("\n");
             sb.Append("  EndTime: ").Append(EndTime).Append("\n");
@@ -114,6 +137,9 @@ namespace Org.OpenAPITools.Models
             sb.Append("  PlaceSchema: ").Append(PlaceSchema).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  Categories: ").Append(Categories).Append("\n");
+            sb.Append("  FreePlace: ").Append(FreePlace).Append("\n");
+            sb.Append("  MaxPlace: ").Append(MaxPlace).Append("\n");
+            sb.Append("  Places: ").Append(Places).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -124,7 +150,7 @@ namespace Org.OpenAPITools.Models
         /// <returns>JSON string presentation of the object</returns>
         public string ToJson()
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
 
         /// <summary>
@@ -134,31 +160,26 @@ namespace Org.OpenAPITools.Models
         /// <returns>Boolean</returns>
         public override bool Equals(object obj)
         {
-            if (obj is null) return false;
+            if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             return obj.GetType() == GetType() && Equals((EventDTO)obj);
         }
 
         /// <summary>
-        /// Returns true if EventDTO instances are equal
+        /// Returns true if ModelEvent instances are equal
         /// </summary>
-        /// <param name="other">Instance of EventDTO to be compared</param>
+        /// <param name="other">Instance of ModelEvent to be compared</param>
         /// <returns>Boolean</returns>
         public bool Equals(EventDTO other)
         {
-            if (other is null) return false;
+            if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
 
             return
                 (
                     Id == other.Id ||
-                    
+                    Id != null &&
                     Id.Equals(other.Id)
-                ) &&
-                (
-                    FreePlace == other.FreePlace ||
-                    
-                    FreePlace.Equals(other.FreePlace)
                 ) &&
                 (
                     Title == other.Title ||
@@ -167,12 +188,12 @@ namespace Org.OpenAPITools.Models
                 ) &&
                 (
                     StartTime == other.StartTime ||
-                    
+                    StartTime != null &&
                     StartTime.Equals(other.StartTime)
                 ) &&
                 (
                     EndTime == other.EndTime ||
-                    
+                    EndTime != null &&
                     EndTime.Equals(other.EndTime)
                 ) &&
                 (
@@ -197,14 +218,28 @@ namespace Org.OpenAPITools.Models
                 ) &&
                 (
                     Status == other.Status ||
-                    
+                    Status != null &&
                     Status.Equals(other.Status)
                 ) &&
                 (
                     Categories == other.Categories ||
                     Categories != null &&
-                    other.Categories != null &&
                     Categories.SequenceEqual(other.Categories)
+                ) &&
+                (
+                    FreePlace == other.FreePlace ||
+                    FreePlace != null &&
+                    FreePlace.Equals(other.FreePlace)
+                ) &&
+                (
+                    MaxPlace == other.MaxPlace ||
+                    MaxPlace != null &&
+                    MaxPlace.Equals(other.MaxPlace)
+                ) &&
+                (
+                    Places == other.Places ||
+                    Places != null &&
+                    Places.SequenceEqual(other.Places)
                 );
         }
 
@@ -218,15 +253,13 @@ namespace Org.OpenAPITools.Models
             {
                 var hashCode = 41;
                 // Suitable nullity checks etc, of course :)
-                    
+                if (Id != null)
                     hashCode = hashCode * 59 + Id.GetHashCode();
-                    
-                    hashCode = hashCode * 59 + FreePlace.GetHashCode();
                 if (Title != null)
                     hashCode = hashCode * 59 + Title.GetHashCode();
-                    
+                if (StartTime != null)
                     hashCode = hashCode * 59 + StartTime.GetHashCode();
-                    
+                if (EndTime != null)
                     hashCode = hashCode * 59 + EndTime.GetHashCode();
                 if (Latitude != null)
                     hashCode = hashCode * 59 + Latitude.GetHashCode();
@@ -236,16 +269,22 @@ namespace Org.OpenAPITools.Models
                     hashCode = hashCode * 59 + Name.GetHashCode();
                 if (PlaceSchema != null)
                     hashCode = hashCode * 59 + PlaceSchema.GetHashCode();
-                    
+                if (Status != null)
                     hashCode = hashCode * 59 + Status.GetHashCode();
                 if (Categories != null)
                     hashCode = hashCode * 59 + Categories.GetHashCode();
+                if (FreePlace != null)
+                    hashCode = hashCode * 59 + FreePlace.GetHashCode();
+                if (MaxPlace != null)
+                    hashCode = hashCode * 59 + MaxPlace.GetHashCode();
+                if (Places != null)
+                    hashCode = hashCode * 59 + Places.GetHashCode();
                 return hashCode;
             }
         }
 
         #region Operators
-        #pragma warning disable 1591
+#pragma warning disable 1591
 
         public static bool operator ==(EventDTO left, EventDTO right)
         {
@@ -257,7 +296,7 @@ namespace Org.OpenAPITools.Models
             return !Equals(left, right);
         }
 
-        #pragma warning restore 1591
+#pragma warning restore 1591
         #endregion Operators
     }
 }

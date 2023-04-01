@@ -10,7 +10,7 @@ namespace dionizos_backend_app
         {
             var client = new SecretClient(
                 new Uri("https://dionizos-keyvault.vault.azure.net/"),
-                new DefaultAzureCredential(includeInteractiveCredentials: false),
+                new DefaultAzureCredential(includeInteractiveCredentials: true),
                 new SecretClientOptions
                 {
                     Retry =
