@@ -48,7 +48,7 @@ namespace Org.OpenAPITools.Controllers
         [Route("/organizer/{id}")]
         public virtual async Task<IActionResult> Confirm([FromRoute (Name = "id")][Required]string id, [FromQuery (Name = "code")][Required()]string code)
         {
-            int Id = int.Parse(id);
+            long Id = long.Parse(id);
             DateTime currTime = DateTime.Now;
             Emailcode? entity = await _context.Emailcodes
                                             .Include(x => x.Organizer)
@@ -100,7 +100,7 @@ namespace Org.OpenAPITools.Controllers
                 return StatusCode(404);
             }
 
-            int Id = int.Parse(id);
+            long Id = long.Parse(id);
 
             // check if valid oraganizer
             if(organizer.Id != Id)
