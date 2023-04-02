@@ -31,15 +31,14 @@ namespace dionizos_backend_app.Extensions
         public static EventDTO AsDto(this Event ev, bool withCatAndPlace)
         {
             DionizosDataContext context = new();
-            // var busyPlaces = ev.Reservatons.Select(x => x.PlaceId);
             var busyPlaces = context.Reservatons.Where(r => r.EventId == ev.Id).Select(r => r.PlaceId).ToArray();
             return new EventDTO()
             {
                 Id = ev.Id,
                 MaxPlace = ev.Placecapacity,
                 Title = ev.Title,
-                StartTime = ((DateTimeOffset)ev.Starttime).ToUnixTimeSeconds(),
-                EndTime = ((DateTimeOffset)ev.Endtime).ToUnixTimeSeconds(),
+                StartTime = ((DateTimeOffset)DateTime.SpecifyKind(ev.Starttime, DateTimeKind.Utc)).ToUnixTimeSeconds(),
+                EndTime = ((DateTimeOffset)DateTime.SpecifyKind(ev.Endtime, DateTimeKind.Utc)).ToUnixTimeSeconds(),
                 Name = ev.Name ?? "unknown",
                 PlaceSchema = ev.Placeschema ?? "",
                 Status = (EventStatus)ev.Status,
@@ -84,7 +83,7 @@ namespace dionizos_backend_app.Extensions
             };
         }
 
-        
+
         /// <summary>
         /// Encodes a base64 string
         /// </summary>
@@ -127,6 +126,24 @@ namespace dionizos_backend_app.Extensions
             string hashedPassword = Convert.ToBase64String(hashBytes);
 
             return hashedPassword;
+        }
+
+
+        public static string toStringEnum(this EventStatus es)
+        {
+            switch (es)
+            {
+                case EventStatus.InFutureEnum:
+                    return "in future";
+                case EventStatus.PendingEnum:
+                    return "pending";
+                case EventStatus.DoneEnum:
+                    return "done";
+                case EventStatus.CancelledEnum:
+                    return "cancelled";
+                default:
+                    return "Unknown";
+            }
         }
     }
 }

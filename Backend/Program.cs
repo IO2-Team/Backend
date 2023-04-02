@@ -5,6 +5,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System;
 using Microsoft.AspNetCore.HttpLogging;
+using Quartz;
 
 namespace dionizos_backend_app
 {
@@ -58,6 +59,22 @@ namespace dionizos_backend_app
             builder.Services.AddSingleton<IConfigurationRoot>(config);
             builder.Services.AddTransient<IHelper, Helpers>();
             builder.Services.AddTransient<IMailing, Mailing>();
+
+            builder.Services.AddQuartz(q =>
+            {
+                q.UseMicrosoftDependencyInjectionScopedJobFactory();
+                // Just use the name of your job that you created in the Jobs folder.
+                var jobKey = new JobKey("RefreshEventStatus");
+                q.AddJob<RefreshEventStatus>(opts => opts.WithIdentity(jobKey));
+
+                q.AddTrigger(opts => opts
+                    .ForJob(jobKey)
+                    .WithIdentity("RefreshEventStatus-trigger")
+                    //This Cron interval can be described as "run every minute" (when second is zero)
+                    .WithCronSchedule("0 * * ? * *")
+                );
+            });
+            builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
             var app = builder.Build();
             
