@@ -195,6 +195,27 @@ namespace Org.OpenAPITools.Controllers
         }
 
         /// <summary>
+        /// Get organizer account (my account)
+        /// </summary>
+        /// <param name="sessionToken">session Token</param>
+        /// <response code="200">successful operation</response>
+        /// <response code="400">invalid session</response>
+        [HttpGet]
+        [Route("/organizer")]
+
+        public virtual IActionResult GetOrganizer([FromHeader][Required()] string sessionToken)
+        {
+            Organizer? organizer = _helper.Validate(sessionToken);
+            if (organizer == null)
+            {
+                return StatusCode(400);
+            }
+            var dto = organizer.AsDto();
+            dto.Password = "";
+            return StatusCode(200, dto);
+        }
+
+        /// <summary>
         /// Create orginizer account
         /// </summary>
         /// <param name="name">name of OrganizerDTO</param>

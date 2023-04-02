@@ -9,6 +9,7 @@ namespace dionizos_backend_app.Extensions
 {
     public static class Extensions
     {
+
         public static OrganizerDTO AsDto(this Organizer organizer)
         {
             DionizosDataContext context = new();
@@ -17,36 +18,41 @@ namespace dionizos_backend_app.Extensions
                 Id = organizer.Id,
                 Email = organizer.Email,
                 Name = organizer.Name,
-                Password = organizer.Password,
+                Password = "",
                 Status = (OrganizerDTO.StatusEnum)organizer.Status,
                 Events = context.Events
                                 .Where(x => x.Owner == organizer.Id)
                                 .AsEnumerable()
-                                .Select(x => x.AsDto())
+                                .Select(x => x.AsDto(false))
                                 .ToList(),
             };
         }
 
-        public static EventDTO AsDto(this Event ev)
+        public static EventDTO AsDto(this Event ev, bool withCatAndPlace)
         {
             DionizosDataContext context = new();
+            var busyPlaces = ev.Reservatons.Select(x => x.PlaceId);
             return new EventDTO()
             {
                 Id = ev.Id,
-                FreePlace = ev.Placecapacity - context.Reservatons.Count(x => x.EventId == ev.Id),
+                MaxPlace = ev.Placecapacity,
                 Title = ev.Title,
                 StartTime = ((DateTimeOffset)ev.Starttime).ToUnixTimeSeconds(),
                 EndTime = ((DateTimeOffset)ev.Endtime).ToUnixTimeSeconds(),
                 Name = ev.Name ?? "unknown",
                 PlaceSchema = ev.Placeschema ?? "",
                 Status = (EventStatus)ev.Status,
-                Categories = context.Eventincategories
+                Categories = withCatAndPlace ? context.Eventincategories
                                     .Include(x => x.Categories)
                                     .Where(x => x.EventId == ev.Id)
                                     .Select(x => x.Categories.AsDto())
-                                    .ToList(),
+                                    .ToList()
+                                    : new List<CategoryDTO>(),
                 Latitude = ev.Latitude,
-                Longitude = ev.Longitude
+                Longitude = ev.Longitude,
+
+                FreePlace = ev.Placecapacity - busyPlaces.Count(),
+                Places = withCatAndPlace ? Enumerable.Range(0, ev.Placecapacity).Select(i => new PlaceDTO() { Id = i , Free = !busyPlaces.Contains(i)}).ToList() : new List<PlaceDTO>()
             };
         }
 
@@ -67,6 +73,17 @@ namespace dionizos_backend_app.Extensions
             };
         }
 
+        public static ReservationDTO AsDto(this Reservaton reservaton)
+        {
+            return new ReservationDTO()
+            {
+                EventId = reservaton.EventId,
+                PlaceId = reservaton.PlaceId,
+                ReservationToken = reservaton.Token
+            };
+        }
+
+        
         /// <summary>
         /// Encodes a base64 string
         /// </summary>

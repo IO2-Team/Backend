@@ -3,15 +3,15 @@
 -- tables
 -- Table: Categories
 CREATE TABLE Categories (
-    id Serial  NOT NULL,
+    id bigserial  NOT NULL,
     name varchar(250)  NOT NULL,
     CONSTRAINT Categories_pk PRIMARY KEY (id)
 );
 
 -- Table: EmailCodes
 CREATE TABLE EmailCodes (
-    id Serial  NOT NULL,
-    organizer_id int  NOT NULL,
+    id bigserial  NOT NULL,
+    organizer_id bigint  NOT NULL,
     code varchar(255)  NOT NULL,
     time timestamp  NOT NULL,
     CONSTRAINT EmailCodes_pk PRIMARY KEY (id)
@@ -19,16 +19,16 @@ CREATE TABLE EmailCodes (
 
 -- Table: EventInCategories
 CREATE TABLE EventInCategories (
-    id Serial  NOT NULL,
-    event_id int  NOT NULL,
-    categories_id int  NOT NULL,
+    id bigserial  NOT NULL,
+    event_id bigint  NOT NULL,
+    categories_id bigint  NOT NULL,
     CONSTRAINT EventInCategories_pk PRIMARY KEY (id)
 );
 
 -- Table: Events
 CREATE TABLE Events (
-    id Serial  NOT NULL,
-    owner int  NOT NULL,
+    id bigserial  NOT NULL,
+    owner bigint  NOT NULL,
     title varchar(250)  NOT NULL,
     name text  NULL,
     startTime timestamp  NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE Events (
 
 -- Table: Organizers
 CREATE TABLE Organizers (
-    id Serial  NOT NULL,
+    id bigserial  NOT NULL,
     name varchar(320)  NOT NULL,
     email varchar(320)  NOT NULL,
     password text  NOT NULL,
@@ -53,16 +53,16 @@ CREATE TABLE Organizers (
 
 -- Table: Reservatons
 CREATE TABLE Reservatons (
-    event_id int  NOT NULL,
-    place_id int  NOT NULL,
-    token int  NOT NULL,
+    event_id bigint  NOT NULL,
+    place_id bigint  NOT NULL,
+    token varchar(64)  NOT NULL,
     CONSTRAINT Reservatons_pk PRIMARY KEY (event_id,place_id)
 );
 
 -- Table: Sessions
 CREATE TABLE Sessions (
-    id Serial  NOT NULL,
-    organizer_id int  NOT NULL,
+    id bigserial  NOT NULL,
+    organizer_id bigint  NOT NULL,
     token varchar(255)  NOT NULL,
     time timestamp  NOT NULL,
     CONSTRAINT Sessions_pk PRIMARY KEY (id)

@@ -8,6 +8,8 @@ namespace dionizos_backend_app
     public interface IHelper
     {
         public Organizer? Validate(string sessionToken);
+        public string generateRandomToken(int length);
+
     }
     public class Helpers : IHelper
     {
@@ -49,6 +51,15 @@ namespace dionizos_backend_app
         private int GetSessionLengthSeconds()
         {
             return int.Parse(_configurationRoot["SessionLengthSeconds"]);
+        }
+
+        public string generateRandomToken(int length)
+        {
+            Random random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            string s = new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+            return s;
         }
 
     }
