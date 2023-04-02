@@ -49,7 +49,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">event can not be created</response>
         [HttpPost]
         [Route("/events")]
-        public virtual async Task<IActionResult > AddEvent([FromHeader][Required()] string sessionToken, [FromQuery][Required()] string title, [FromQuery][Required()] string name, [FromQuery][Required()] int? freePlace, [FromQuery][Required()] int? startTime, [FromQuery][Required()] int? endTime, [FromQuery][Required()] string latitude, [FromQuery][Required()] string longitude, [FromQuery][Required()] List<int?> categories, [FromQuery] string? placeSchema)
+        public virtual async Task<IActionResult > AddEvent([FromHeader][Required()] string sessionToken, [FromQuery][Required()] string title, [FromQuery][Required()] string name, [FromQuery][Required()] int? freePlace, [FromQuery][Required()] int? startTime, [FromQuery][Required()] int? endTime, [FromQuery][Required()] string latitude, [FromQuery][Required()] string longitude, [FromQuery][Required()] List<long?> categories, [FromQuery] string? placeSchema)
         {
             var organizer = _helper.Validate(sessionToken);
             if (organizer is null) return StatusCode(400);
