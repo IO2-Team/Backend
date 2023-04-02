@@ -28,7 +28,7 @@ namespace dionizos_backend_app.Extensions
             };
         }
 
-        public static EventDTO AsDto(this Event ev, bool withCatAndPlace)
+        public static EventDTO AsDto(this Event ev, bool withPlace)
         {
             DionizosDataContext context = new();
             var busyPlaces = context.Reservatons.Where(r => r.EventId == ev.Id).Select(r => r.PlaceId).ToArray();
@@ -42,17 +42,16 @@ namespace dionizos_backend_app.Extensions
                 Name = ev.Name ?? "unknown",
                 PlaceSchema = ev.Placeschema ?? "",
                 Status = (EventStatus)ev.Status,
-                Categories = withCatAndPlace ? context.Eventincategories
+                Categories = context.Eventincategories
                                     .Include(x => x.Categories)
                                     .Where(x => x.EventId == ev.Id)
                                     .Select(x => x.Categories.AsDto())
-                                    .ToList()
-                                    : new List<CategoryDTO>(),
+                                    .ToList(),
                 Latitude = ev.Latitude,
                 Longitude = ev.Longitude,
 
                 FreePlace = ev.Placecapacity - busyPlaces.Length,
-                Places = withCatAndPlace ? Enumerable.Range(0, ev.Placecapacity).Select(i => new PlaceDTO() { Id = i , Free = !busyPlaces.Contains(i)}).ToList() : new List<PlaceDTO>()
+                Places = withPlace ? Enumerable.Range(0, ev.Placecapacity).Select(i => new PlaceDTO() { Id = i , Free = !busyPlaces.Contains(i)}).ToList() : new List<PlaceDTO>()
             };
         }
 

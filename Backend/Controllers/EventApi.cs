@@ -225,7 +225,11 @@ namespace Org.OpenAPITools.Controllers
             if(!string.IsNullOrEmpty(_event.Latitude)) @event.Latitude = _event.Latitude;
             if(!string.IsNullOrEmpty(_event.Longitude)) @event.Longitude = _event.Longitude;
             if(!string.IsNullOrEmpty(_event.PlaceSchema)) @event.Placeschema = _event.PlaceSchema;
+            //TODO: nie mo¿e byæ mniej ni¿ by³o - bo mog¹ byæ juz zajête
             if(_event.MaxPlace != null) @event.Placecapacity = (int)_event.MaxPlace.Value;
+
+            _dionizosDataContext.Update(@event);
+            await _dionizosDataContext.SaveChangesAsync();
 
             EventDTO dto = @event.AsDto(false);
             return StatusCode(202, dto);
