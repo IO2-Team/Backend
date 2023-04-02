@@ -9,6 +9,7 @@ namespace dionizos_backend_app.Extensions
 {
     public static class Extensions
     {
+
         public static OrganizerDTO AsDto(this Organizer organizer)
         {
             DionizosDataContext context = new();
@@ -70,6 +71,22 @@ namespace dionizos_backend_app.Extensions
             {
                 SessionToken = session.Token,
             };
+        }
+
+        public static ReservationDTO AsDto(this Reservaton reservaton)
+        {
+            return new ReservationDTO()
+            {
+                EventId = reservaton.EventId,
+                PlaceId = reservaton.PlaceId,
+                ReservationToken = reservaton.Token.ToString()
+            };
+        }
+
+        public static int generateRandomToken()
+        {
+            Random random = new Random();
+            return (int)random.NextInt64();
         }
 
         /// <summary>
