@@ -5,11 +5,11 @@ namespace dionizos_backend_app.Models;
 
 public partial class Eventincategory
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
 
-    public int EventId { get; set; }
+    public long EventId { get; set; }
 
-    public int CategoriesId { get; set; }
+    public long CategoriesId { get; set; }
 
     public virtual Category Categories { get; set; } = null!;
 
