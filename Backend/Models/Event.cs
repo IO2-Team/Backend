@@ -5,9 +5,9 @@ namespace dionizos_backend_app.Models;
 
 public partial class Event
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
 
-    public int Owner { get; set; }
+    public long Owner { get; set; }
 
     public string Title { get; set; } = null!;
 

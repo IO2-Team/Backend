@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,9 +41,7 @@ public partial class DionizosDataContext : DbContext
 
             entity.ToTable("categories");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasMaxLength(250)
                 .HasColumnName("name");
@@ -55,9 +53,7 @@ public partial class DionizosDataContext : DbContext
 
             entity.ToTable("emailcodes");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Code)
                 .HasMaxLength(255)
                 .HasColumnName("code");
@@ -79,7 +75,6 @@ public partial class DionizosDataContext : DbContext
             entity.ToTable("events");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            
             entity.Property(e => e.Endtime)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("endtime");
@@ -89,8 +84,7 @@ public partial class DionizosDataContext : DbContext
             entity.Property(e => e.Longitude)
                 .HasMaxLength(20)
                 .HasColumnName("longitude");
-            entity.Property(e => e.Name)
-                .HasColumnName("name");
+            entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.Owner).HasColumnName("owner");
             entity.Property(e => e.Placecapacity).HasColumnName("placecapacity");
             entity.Property(e => e.Placeschema).HasColumnName("placeschema");
@@ -114,9 +108,7 @@ public partial class DionizosDataContext : DbContext
 
             entity.ToTable("eventincategories");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CategoriesId).HasColumnName("categories_id");
             entity.Property(e => e.EventId).HasColumnName("event_id");
 
@@ -137,9 +129,7 @@ public partial class DionizosDataContext : DbContext
 
             entity.ToTable("organizers");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Email)
                 .HasMaxLength(320)
                 .HasColumnName("email");
@@ -158,7 +148,9 @@ public partial class DionizosDataContext : DbContext
 
             entity.Property(e => e.EventId).HasColumnName("event_id");
             entity.Property(e => e.PlaceId).HasColumnName("place_id");
-            entity.Property(e => e.Token).HasColumnName("token");
+            entity.Property(e => e.Token)
+                .HasMaxLength(64)
+                .HasColumnName("token");
 
             entity.HasOne(d => d.Event).WithMany(p => p.Reservatons)
                 .HasForeignKey(d => d.EventId)
@@ -172,9 +164,7 @@ public partial class DionizosDataContext : DbContext
 
             entity.ToTable("sessions");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.OrganizerId).HasColumnName("organizer_id");
             entity.Property(e => e.Time)
                 .HasColumnType("timestamp without time zone")
