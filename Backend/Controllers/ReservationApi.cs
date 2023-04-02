@@ -45,7 +45,7 @@ namespace Org.OpenAPITools.Controllers
         [Route("/reservation")]
         public virtual async Task<IActionResult> DeleteReservation([FromQuery (Name = "reservationToken")][Required()]string reservationToken)
         {
-            Reservaton? res = await _dionizosDataContext.Reservatons.FirstOrDefaultAsync(x => x.Token == int.Parse(reservationToken));
+            Reservaton? res = await _dionizosDataContext.Reservatons.FirstOrDefaultAsync(x => x.Token == reservationToken);
             if(res is null) StatusCode(404);
             _dionizosDataContext.Reservatons.Remove(res!);
             return StatusCode(204);
@@ -70,7 +70,7 @@ namespace Org.OpenAPITools.Controllers
             if(placeID is null)
             {
                 var busy = e.Reservatons.Select(x => x.PlaceId).ToList();
-                for (int i = 0; i < e.Placecapacity; i++)
+                for (long i = 0; i < e.Placecapacity; i++)
                     if(!busy.Contains(i))
                     {
                         placeID = i;
@@ -81,11 +81,11 @@ namespace Org.OpenAPITools.Controllers
             {
                 if (e.Reservatons.Any(x => x.PlaceId == placeID)) return StatusCode(400);
             }
-            var token = Extensions.generateRandomToken();
+            var token = _helper.generateRandomToken(32);
             Reservaton reservaton = new Reservaton()
             {
                 EventId = e.Id,
-                PlaceId = (int)placeID,
+                PlaceId = placeID.Value,
                 Token = token
             };
             await _dionizosDataContext.Reservatons.AddAsync(reservaton);

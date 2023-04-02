@@ -79,16 +79,11 @@ namespace dionizos_backend_app.Extensions
             {
                 EventId = reservaton.EventId,
                 PlaceId = reservaton.PlaceId,
-                ReservationToken = reservaton.Token.ToString()
+                ReservationToken = reservaton.Token
             };
         }
 
-        public static int generateRandomToken()
-        {
-            Random random = new Random();
-            return (int)random.NextInt64();
-        }
-
+        
         /// <summary>
         /// Encodes a base64 string
         /// </summary>
