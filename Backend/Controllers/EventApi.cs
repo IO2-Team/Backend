@@ -72,8 +72,8 @@ namespace Org.OpenAPITools.Controllers
             newEvent.Longitude = longitude;
             newEvent.Owner = organizer.Id;
             newEvent.Name = name;
-            newEvent.Starttime = DateTimeOffset.FromUnixTimeSeconds((long)startTime).DateTime;
-            newEvent.Endtime = DateTimeOffset.FromUnixTimeSeconds((long)endTime).DateTime;
+            newEvent.Starttime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(startTime.Value).DateTime, DateTimeKind.Unspecified);
+            newEvent.Endtime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(endTime.Value).DateTime, DateTimeKind.Unspecified);
             newEvent.Placecapacity = (int)freePlace;
             newEvent.Status = (int)EventStatus.InFutureEnum;
             newEvent.Placeschema = placeSchema ?? "";
@@ -194,15 +194,39 @@ namespace Org.OpenAPITools.Controllers
         [HttpPatch]
         [Route("/events/{id}")]
         [Consumes("application/json")]
-        public virtual IActionResult PatchEvent([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id, [FromBody]EventDTO _event)
+        public virtual async Task<IActionResult> PatchEvent([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id, [FromBody]EventDTO _event)
         {
+            Organizer? organizer = _helper.Validate(sessionToken);
+            // check if validated session
+            if(organizer == null)
+            {
+                return StatusCode(404);
+            }
 
-            //TODO: Uncomment the next line to return response 202 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(202);
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
+            long Id = long.Parse(id);
+            Event? @event = await _dionizosDataContext.Events
+                                                      .Where(x => x.Owner == organizer.Id
+                                                        && x.Id == Id)
+                                                      .FirstOrDefaultAsync();
+            // Check if event with provided ID exists
+            if(@event == null
+                || @event.Id != _event.Id)
+            {
+                return StatusCode(404);
+            }
 
-            throw new NotImplementedException();
+            // Update time
+            if (!string.IsNullOrEmpty(_event.Title)) @event.Title = _event.Title;
+            if (!string.IsNullOrEmpty(_event.Name)) @event.Name = _event.Name;
+            if (_event.StartTime != null) @event.Starttime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(_event.StartTime.Value).DateTime, DateTimeKind.Unspecified);
+            if (_event.EndTime != null) @event.Endtime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(_event.EndTime.Value).DateTime, DateTimeKind.Unspecified);
+            if(!string.IsNullOrEmpty(_event.Latitude)) @event.Latitude = _event.Latitude;
+            if(!string.IsNullOrEmpty(_event.Longitude)) @event.Longitude = _event.Longitude;
+            if(!string.IsNullOrEmpty(_event.PlaceSchema)) @event.Placeschema = _event.PlaceSchema;
+            if(_event.MaxPlace != null) @event.Placecapacity = (int)_event.MaxPlace.Value;
+
+            EventDTO dto = @event.AsDto(false);
+            return StatusCode(202, dto);
         }
     }
 }
