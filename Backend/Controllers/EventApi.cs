@@ -91,7 +91,7 @@ namespace Org.OpenAPITools.Controllers
             }
 
             await _dionizosDataContext.SaveChangesAsync();
-            EventDTO dto = newEvent.AsDto();
+            EventDTO dto = newEvent.AsDto(true);
             return StatusCode(200, dto);
         }
 
@@ -129,7 +129,7 @@ namespace Org.OpenAPITools.Controllers
             List<Eventincategory> eInC = await _dionizosDataContext.Eventincategories.Include(x => x.Event)
                                                                                      .Where(x => x.CategoriesId == categoryId)
                                                                                      .ToListAsync();
-            return new ObjectResult(eInC.Select(x => x.Event.AsDto()).ToList());
+            return new ObjectResult(eInC.Select(x => x.Event.AsDto(false)).ToList());
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace Org.OpenAPITools.Controllers
 
             Event? e = await _dionizosDataContext.Events.FirstOrDefaultAsync(x => x.Id == id);
             if(e is null) return StatusCode(404);
-            return new ObjectResult(e.AsDto());
+            return new ObjectResult(e.AsDto(true));
         }
 
         /// <summary>
@@ -160,7 +160,8 @@ namespace Org.OpenAPITools.Controllers
         [Route("/events")]
         public virtual async Task<IActionResult> GetEvents()
         {
-            List<EventDTO> events = _dionizosDataContext.Events.Select(x => x.AsDto()).ToList();
+            List<EventDTO> events = _dionizosDataContext.Events.Select(x => x.AsDto(false)).ToList();
+
             return new ObjectResult(events);
         }
 
@@ -178,7 +179,7 @@ namespace Org.OpenAPITools.Controllers
             if (organizer is null) return StatusCode(400);
 
             List<EventDTO> events = await _dionizosDataContext.Events.Where(x => x.Owner == organizer.Id)
-                                                                     .Select(x => x.AsDto()).ToListAsync();
+                                                                     .Select(x => x.AsDto(false)).ToListAsync();
             return new ObjectResult(events);
         }
 

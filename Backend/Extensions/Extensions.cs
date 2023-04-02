@@ -22,34 +22,36 @@ namespace dionizos_backend_app.Extensions
                 Events = context.Events
                                 .Where(x => x.Owner == organizer.Id)
                                 .AsEnumerable()
-                                .Select(x => x.AsDto())
+                                .Select(x => x.AsDto(false))
                                 .ToList(),
             };
         }
 
-        public static EventDTO AsDto(this Event ev)
+        public static EventDTO AsDto(this Event ev, bool withCatAndPlace)
         {
             DionizosDataContext context = new();
+            var busyPlaces = ev.Reservatons.Select(x => x.PlaceId);
             return new EventDTO()
             {
                 Id = ev.Id,
                 MaxPlace = ev.Placecapacity,
-                FreePlace = ev.Placecapacity - context.Reservatons.Count(x => x.EventId == ev.Id),
                 Title = ev.Title,
                 StartTime = ((DateTimeOffset)ev.Starttime).ToUnixTimeSeconds(),
                 EndTime = ((DateTimeOffset)ev.Endtime).ToUnixTimeSeconds(),
                 Name = ev.Name ?? "unknown",
                 PlaceSchema = ev.Placeschema ?? "",
                 Status = (EventStatus)ev.Status,
-                Categories = context.Eventincategories
+                Categories = withCatAndPlace ? context.Eventincategories
                                     .Include(x => x.Categories)
                                     .Where(x => x.EventId == ev.Id)
                                     .Select(x => x.Categories.AsDto())
-                                    .ToList(),
+                                    .ToList()
+                                    : new List<CategoryDTO>(),
                 Latitude = ev.Latitude,
                 Longitude = ev.Longitude,
-                //TODO: add after db change
-                Places = new List<PlaceDTO>()
+
+                FreePlace = ev.Placecapacity - busyPlaces.Count(),
+                Places = withCatAndPlace ? Enumerable.Range(0, ev.Placecapacity).Select(i => new PlaceDTO() { Id = i , Free = !busyPlaces.Contains(i)}).ToList() : new List<PlaceDTO>()
             };
         }
 
