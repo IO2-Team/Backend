@@ -183,15 +183,31 @@ namespace Org.OpenAPITools.Controllers
         [HttpPatch]
         [Route("/organizer/{id}")]
         [Consumes("application/json")]
-        public virtual IActionResult PatchOrganizer([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id, [FromBody]OrganizerDTO organizer)
+        public virtual async Task<IActionResult> PatchOrganizer([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id, [FromBody]OrganizerDTO organizer)
         {
+            Organizer? validatedOrganizer = _helper.Validate(sessionToken);
+            if(validatedOrganizer == null
+                || organizer.Id != validatedOrganizer.Id)
+            {
+                // not authenticated / wrong id
+                return StatusCode(404);
+            }
 
-            //TODO: Uncomment the next line to return response 202 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(202);
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
+            long Id = long.Parse(id);
+            // Check if organizer is trying to patch itself
+            if(validatedOrganizer.Id != Id)
+            {
+                return StatusCode(404);
+            }
 
-            throw new NotImplementedException();
+            if(!string.IsNullOrEmpty(organizer.Name)) validatedOrganizer.Name = organizer.Name;
+            // TODO: (kutakw) Currently not available
+            //if(!string.IsNullOrEmpty(organizer.Email)) validatedOrganizer.Email = organizer.Email;
+            if(!string.IsNullOrEmpty(organizer.Password)) validatedOrganizer.Password = Extensions.EncryptPass(organizer.Password);
+
+            await _context.SaveChangesAsync();
+            OrganizerDTO dto = validatedOrganizer.AsDto();
+            return StatusCode(202, dto);
         }
 
         /// <summary>
@@ -202,7 +218,6 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">invalid session</response>
         [HttpGet]
         [Route("/organizer")]
-
         public virtual IActionResult GetOrganizer([FromHeader][Required()] string sessionToken)
         {
             Organizer? organizer = _helper.Validate(sessionToken);
@@ -211,7 +226,6 @@ namespace Org.OpenAPITools.Controllers
                 return StatusCode(400);
             }
             var dto = organizer.AsDto();
-            dto.Password = "";
             return StatusCode(200, dto);
         }
 
