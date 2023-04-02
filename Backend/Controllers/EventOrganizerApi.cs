@@ -102,6 +102,13 @@ namespace Org.OpenAPITools.Controllers
 
             int Id = int.Parse(id);
 
+            // check if valid oraganizer
+            if(organizer.Id != Id)
+            {
+                // invalid organizer id - trying to delete other organizer
+                return StatusCode(404);
+            }
+
             // check if any planned or pending events exist
             if(organizer.Events.Any(x => 
                 x.Status == (int)EventStatus.InFutureEnum
