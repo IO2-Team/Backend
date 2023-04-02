@@ -52,7 +52,7 @@ namespace dionizos_backend_app.Extensions
                 Longitude = ev.Longitude,
 
                 FreePlace = ev.Placecapacity - busyPlaces.Count(),
-                Places = withCatAndPlace ? Enumerable.Range(0, ev.Placecapacity).Select(i => new PlaceDTO() { Id = i , Free = !busyPlaces.Contains(i)}).ToList() : new List<PlaceDTO>()
+                Places = withCatAndPlace ? Enumerable.Range(0, ev.Placecapacity).Select(i => new PlaceDTO() { Id = i, Free = !busyPlaces.Contains(i) }).ToList() : new List<PlaceDTO>()
             };
         }
 
@@ -83,7 +83,7 @@ namespace dionizos_backend_app.Extensions
             };
         }
 
-        
+
         /// <summary>
         /// Encodes a base64 string
         /// </summary>
@@ -126,6 +126,24 @@ namespace dionizos_backend_app.Extensions
             string hashedPassword = Convert.ToBase64String(hashBytes);
 
             return hashedPassword;
+        }
+
+
+        public static string toStringEnum(this EventStatus es)
+        {
+            switch (es)
+            {
+                case EventStatus.InFutureEnum:
+                    return "in future";
+                case EventStatus.PendingEnum:
+                    return "pending";
+                case EventStatus.DoneEnum:
+                    return "done";
+                case EventStatus.CancelledEnum:
+                    return "cancelled";
+                default:
+                    return "Unknown";
+            }
         }
     }
 }
