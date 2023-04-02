@@ -48,6 +48,7 @@ namespace Org.OpenAPITools.Controllers
             Reservaton? res = await _dionizosDataContext.Reservatons.FirstOrDefaultAsync(x => x.Token == reservationToken);
             if(res is null) StatusCode(404);
             _dionizosDataContext.Reservatons.Remove(res!);
+            await _dionizosDataContext.SaveChangesAsync();
             return StatusCode(204);
         }
 
@@ -64,7 +65,7 @@ namespace Org.OpenAPITools.Controllers
         public virtual async Task<IActionResult> MakeReservation([FromQuery (Name = "eventId")][Required()]long eventId, [FromQuery (Name = "placeID")]long? placeID)
         {
             if (eventId < 1) return StatusCode(404);
-            Event? e = await _dionizosDataContext.Events.FirstOrDefaultAsync(x => x.Id == eventId);
+            Event? e = await _dionizosDataContext.Events.Include(e => e.Reservatons).FirstOrDefaultAsync(x => x.Id == eventId);
             if(e is null || e.Status == (int)EventStatus.CancelledEnum || e.Status == (int)EventStatus.DoneEnum) StatusCode(404);
             if(e.Reservatons.Count() >= e.Placecapacity) StatusCode(400);
             if(placeID is null)
