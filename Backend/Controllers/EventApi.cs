@@ -27,10 +27,12 @@ namespace Org.OpenAPITools.Controllers
     {
         DionizosDataContext _dionizosDataContext;
         IHelper _helper;
-        public EventApiController(DionizosDataContext dionizosDataContext, IHelper helper)
+        ILogger _logger;
+        public EventApiController(DionizosDataContext dionizosDataContext, IHelper helper, ILogger<EventApiController> logger)
         {
             _dionizosDataContext = dionizosDataContext;
             _helper = helper;
+            _logger = logger;
         }
         /// <summary>
         /// Add new event

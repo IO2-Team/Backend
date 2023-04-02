@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System;
+using Microsoft.AspNetCore.HttpLogging;
 
 namespace dionizos_backend_app
 {
@@ -18,6 +19,16 @@ namespace dionizos_backend_app
             var config = configuration.Build();
 
             var builder = WebApplication.CreateBuilder(args);
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+            builder.Services.AddHttpLogging(logging =>
+            {
+                // Customize HTTP logging here.
+                logging.LoggingFields = HttpLoggingFields.RequestPath | HttpLoggingFields.RequestMethod | HttpLoggingFields.ResponseStatusCode;
+                logging.MediaTypeOptions.AddText("application/javascript");
+                logging.RequestBodyLogLimit = 4096;
+                logging.ResponseBodyLogLimit = 4096;
+            });
 
             // Add services to the container.
 
@@ -56,7 +67,7 @@ namespace dionizos_backend_app
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            
+            app.UseHttpLogging();
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
