@@ -31,7 +31,8 @@ namespace dionizos_backend_app.Extensions
         public static EventDTO AsDto(this Event ev, bool withCatAndPlace)
         {
             DionizosDataContext context = new();
-            var busyPlaces = ev.Reservatons.Select(x => x.PlaceId);
+            // var busyPlaces = ev.Reservatons.Select(x => x.PlaceId);
+            var busyPlaces = context.Reservatons.Where(r => r.EventId == ev.Id).Select(r => r.PlaceId).ToArray();
             return new EventDTO()
             {
                 Id = ev.Id,
@@ -51,7 +52,7 @@ namespace dionizos_backend_app.Extensions
                 Latitude = ev.Latitude,
                 Longitude = ev.Longitude,
 
-                FreePlace = ev.Placecapacity - busyPlaces.Count(),
+                FreePlace = ev.Placecapacity - busyPlaces.Length,
                 Places = withCatAndPlace ? Enumerable.Range(0, ev.Placecapacity).Select(i => new PlaceDTO() { Id = i , Free = !busyPlaces.Contains(i)}).ToList() : new List<PlaceDTO>()
             };
         }
