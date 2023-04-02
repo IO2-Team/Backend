@@ -30,7 +30,7 @@ namespace Org.OpenAPITools.Models
         /// Gets or Sets Id
         /// </summary>
         [DataMember(Name="id", EmitDefaultValue=true)]
-        public long Id { get; set; }
+        public long? Id { get; set; }
 
         /// <summary>
         /// Gets or Sets Name
