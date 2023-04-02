@@ -5,9 +5,9 @@ namespace dionizos_backend_app.Models;
 
 public partial class Emailcode
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
 
-    public int OrganizerId { get; set; }
+    public long OrganizerId { get; set; }
 
     public string Code { get; set; } = null!;
 

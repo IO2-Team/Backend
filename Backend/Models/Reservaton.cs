@@ -5,11 +5,11 @@ namespace dionizos_backend_app.Models;
 
 public partial class Reservaton
 {
-    public int EventId { get; set; }
+    public long EventId { get; set; }
 
-    public int PlaceId { get; set; }
+    public long PlaceId { get; set; }
 
-    public int Token { get; set; }
+    public string Token { get; set; } = null!;
 
     public virtual Event Event { get; set; } = null!;
 }
