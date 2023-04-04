@@ -92,7 +92,7 @@ namespace Org.OpenAPITools.Models
         [Required]
 
         [DataMember(Name = "categories")]
-        public List<Category> Categories { get; set; }
+        public List<CategoryDTO> Categories { get; set; }
 
         /// <summary>
         /// Gets or Sets FreePlace
