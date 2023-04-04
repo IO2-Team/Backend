@@ -19,7 +19,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
 
-namespace IO.Swagger.Models
+namespace Org.OpenAPITools.Models
 { 
     /// <summary>
     /// 
