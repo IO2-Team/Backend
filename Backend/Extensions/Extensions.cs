@@ -64,9 +64,9 @@ namespace dionizos_backend_app.Extensions
             };
         }
 
-        public static SessionResponse AsDto(this Session session)
+        public static SessionResponseDTO AsDto(this Session session)
         {
-            return new SessionResponse()
+            return new SessionResponseDTO()
             {
                 SessionToken = session.Token,
             };

@@ -168,7 +168,7 @@ namespace Org.OpenAPITools.Controllers
             await _context.Sessions.AddAsync(session);
             await _context.SaveChangesAsync();
 
-            SessionResponse dto = session.AsDto();
+            SessionResponseDTO dto = session.AsDto();
             return StatusCode(200, dto);
         }
 

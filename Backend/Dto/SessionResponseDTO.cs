@@ -24,7 +24,7 @@ namespace Org.OpenAPITools.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class SessionResponse : IEquatable<SessionResponse>
+    public partial class SessionResponseDTO : IEquatable<SessionResponseDTO>
     {
         /// <summary>
         /// The session token.
@@ -64,7 +64,7 @@ namespace Org.OpenAPITools.Models
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((SessionResponse)obj);
+            return obj.GetType() == GetType() && Equals((SessionResponseDTO)obj);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Org.OpenAPITools.Models
         /// </summary>
         /// <param name="other">Instance of LoginOrganizer200ResponseDTO to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(SessionResponse other)
+        public bool Equals(SessionResponseDTO other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -104,12 +104,12 @@ namespace Org.OpenAPITools.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(SessionResponse left, SessionResponse right)
+        public static bool operator ==(SessionResponseDTO left, SessionResponseDTO right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(SessionResponse left, SessionResponse right)
+        public static bool operator !=(SessionResponseDTO left, SessionResponseDTO right)
         {
             return !Equals(left, right);
         }
