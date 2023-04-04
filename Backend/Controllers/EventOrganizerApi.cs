@@ -12,6 +12,7 @@ using System.ComponentModel.DataAnnotations;
 using dionizos_backend_app;
 using dionizos_backend_app.Extensions;
 using dionizos_backend_app.Models;
+using IO.Swagger.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -46,7 +47,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">code wrong</response>
         [HttpPost]
         [Route("/organizer/{id}")]
-        public virtual async Task<IActionResult> Confirm([FromRoute (Name = "id")][Required]string id, [FromQuery (Name = "code")][Required()]string code)
+        public virtual async Task<IActionResult> Confirm([FromRoute][Required]string id, [FromHeader][Required()]string code)
         {
             long Id = long.Parse(id);
             DateTime currTime = DateTime.Now;
@@ -90,14 +91,14 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">id not found</response>
         [HttpDelete]
         [Route("/organizer/{id}")]
-        public virtual async Task<IActionResult> DeleteOrganizer([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id)
+        public virtual async Task<IActionResult> DeleteOrganizer([FromHeader][Required()]string sessionToken, [FromRoute][Required]string id)
         {
             Organizer? organizer = _helper.Validate(sessionToken);
             // Validate session
             if(organizer == null)
             {
                 // invalid session
-                return StatusCode(404);
+                return StatusCode(403);
             }
 
             long Id = long.Parse(id);
@@ -138,7 +139,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">Invalid email/password supplied</response>
         [HttpGet]
         [Route("/organizer/login")]
-        public virtual async Task<IActionResult> LoginOrganizer([FromQuery (Name = "email")][Required()]string email, [FromQuery (Name = "password")][Required()]string password)
+        public virtual async Task<IActionResult> LoginOrganizer([FromHeader][Required()]string email, [FromHeader][Required()]string password)
         {
             // Check if organizer exists
             Organizer? organizer = await _context.Organizers
@@ -183,14 +184,13 @@ namespace Org.OpenAPITools.Controllers
         [HttpPatch]
         [Route("/organizer/{id}")]
         [Consumes("application/json")]
-        public virtual async Task<IActionResult> PatchOrganizer([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id, [FromBody]OrganizerDTO organizer)
+        public virtual async Task<IActionResult> PatchOrganizer([FromHeader][Required()]string sessionToken, [FromRoute][Required]string id, [FromBody]OrganizerPatchDTO body)
         {
             Organizer? validatedOrganizer = _helper.Validate(sessionToken);
-            if(validatedOrganizer == null
-                || organizer.Id != validatedOrganizer.Id)
+            if(validatedOrganizer == null)
             {
                 // not authenticated / wrong id
-                return StatusCode(404);
+                return StatusCode(403);
             }
 
             long Id = long.Parse(id);
@@ -200,10 +200,10 @@ namespace Org.OpenAPITools.Controllers
                 return StatusCode(404);
             }
 
-            if(!string.IsNullOrEmpty(organizer.Name)) validatedOrganizer.Name = organizer.Name;
+            if(!string.IsNullOrEmpty(body.Name)) validatedOrganizer.Name = body.Name;
             // TODO: (kutakw) Currently not available
             //if(!string.IsNullOrEmpty(organizer.Email)) validatedOrganizer.Email = organizer.Email;
-            if(!string.IsNullOrEmpty(organizer.Password)) validatedOrganizer.Password = Extensions.EncryptPass(organizer.Password);
+            if(!string.IsNullOrEmpty(body.Password)) validatedOrganizer.Password = Extensions.EncryptPass(body.Password);
 
             await _context.SaveChangesAsync();
             OrganizerDTO dto = validatedOrganizer.AsDto();
@@ -223,7 +223,7 @@ namespace Org.OpenAPITools.Controllers
             Organizer? organizer = _helper.Validate(sessionToken);
             if (organizer == null)
             {
-                return StatusCode(400);
+                return StatusCode(403);
             }
             var dto = organizer.AsDto();
             return StatusCode(200, dto);
@@ -239,7 +239,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">organizer already exist</response>
         [HttpPost]
         [Route("/organizer")]
-        public virtual async Task<IActionResult> SignUp([FromQuery (Name = "name")][Required()]string name, [FromQuery (Name = "email")][Required()]string email, [FromQuery (Name = "password")][Required()]string password)
+        public virtual async Task<IActionResult> SignUp([FromBody]OrganizerFormDTO body)
         {
             async Task GenerateEmailcode(DionizosDataContext _context, Organizer organizer)
             {
@@ -268,13 +268,13 @@ namespace Org.OpenAPITools.Controllers
             // Check if organizer with that name or email already exists
             Organizer? organizerInDb =
                 await _context.Organizers
-                              .FirstOrDefaultAsync(x => x.Name == name || x.Email == email);
+                              .FirstOrDefaultAsync(x => x.Name == body.Name || x.Email == body.Email);
 
             if (organizerInDb != null)
             {
                 if(organizerInDb.Status == (int)Organizer.StatusEnum.PendingEnum
-                    && organizerInDb.Name == name
-                    && organizerInDb.Email == email)
+                    && organizerInDb.Name == body.Name
+                    && organizerInDb.Email == body.Email)
                 {
                     // resend code via mail
                     // gen email
@@ -290,9 +290,9 @@ namespace Org.OpenAPITools.Controllers
             // Create new organizer
             Organizer organizer = new()
             {
-                Email = email,
-                Name = name,
-                Password = Extensions.EncryptPass(password),
+                Email = body.Email,
+                Name = body.Name,
+                Password = Extensions.EncryptPass(body.Password),
                 Status = (int)Organizer.StatusEnum.PendingEnum,
             };
             // Add organizer to db
