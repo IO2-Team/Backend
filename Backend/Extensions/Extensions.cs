@@ -28,7 +28,7 @@ namespace dionizos_backend_app.Extensions
             };
         }
 
-        public static EventDTO AsDto(this Event ev, bool withPlace)
+        public static EventDTO AsDto(this Event ev)
         {
             DionizosDataContext context = new();
             var busyPlaces = context.Reservatons.Where(r => r.EventId == ev.Id).Select(r => r.PlaceId).ToArray();
@@ -50,8 +50,34 @@ namespace dionizos_backend_app.Extensions
                 Latitude = ev.Latitude,
                 Longitude = ev.Longitude,
 
+                FreePlace = ev.Placecapacity - busyPlaces.Length
+            };
+        }
+
+        public static EventWithPlacesDTO AsDtoWithPlace(this Event ev)
+        {
+            DionizosDataContext context = new();
+            var busyPlaces = context.Reservatons.Where(r => r.EventId == ev.Id).Select(r => r.PlaceId).ToArray();
+            return new EventWithPlacesDTO()
+            {
+                Id = ev.Id,
+                MaxPlace = ev.Placecapacity,
+                Title = ev.Title,
+                StartTime = ((DateTimeOffset)DateTime.SpecifyKind(ev.Starttime, DateTimeKind.Utc)).ToUnixTimeSeconds(),
+                EndTime = ((DateTimeOffset)DateTime.SpecifyKind(ev.Endtime, DateTimeKind.Utc)).ToUnixTimeSeconds(),
+                Name = ev.Name ?? "unknown",
+                PlaceSchema = ev.Placeschema ?? "",
+                Status = (EventStatus)ev.Status,
+                Categories = context.Eventincategories
+                                    .Include(x => x.Categories)
+                                    .Where(x => x.EventId == ev.Id)
+                                    .Select(x => x.Categories.AsDto())
+                                    .ToList(),
+                Latitude = ev.Latitude,
+                Longitude = ev.Longitude,
+
                 FreePlace = ev.Placecapacity - busyPlaces.Length,
-                Places = withPlace ? Enumerable.Range(0, ev.Placecapacity).Select(i => new PlaceDTO() { Id = i , Free = !busyPlaces.Contains(i)}).ToList() : new List<PlaceDTO>()
+                Places = Enumerable.Range(0, ev.Placecapacity).Select(i => new PlaceDTO() { Id = i, Free = !busyPlaces.Contains(i) }).ToList()
             };
         }
 
