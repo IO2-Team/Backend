@@ -12,7 +12,6 @@ using System.ComponentModel.DataAnnotations;
 using dionizos_backend_app;
 using dionizos_backend_app.Extensions;
 using dionizos_backend_app.Models;
-using IO.Swagger.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
