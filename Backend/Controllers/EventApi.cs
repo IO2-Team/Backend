@@ -12,6 +12,7 @@ using System.ComponentModel.DataAnnotations;
 using dionizos_backend_app;
 using dionizos_backend_app.Extensions;
 using dionizos_backend_app.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -34,83 +35,79 @@ namespace Org.OpenAPITools.Controllers
             _helper = helper;
             _logger = logger;
         }
+
         /// <summary>
         /// Add new event
         /// </summary>
-        /// <param name="sessionToken">session Token</param>
-        /// <param name="title">title of EventDTO</param>
-        /// <param name="name">title of EventDTO</param>
-        /// <param name="freePlace">No of free places</param>
-        /// <param name="startTime">Unix time stamp of begin of event</param>
-        /// <param name="endTime">Unix time stamp of end of event</param>
-        /// <param name="latitude">Latitude of event</param>
-        /// <param name="longitude">Longitude of event</param>
-        /// <param name="categories">Unix time stamp of end of event</param>
-        /// <param name="placeSchema">seralized place schema</param>
+        /// <param name="body">Add event</param>
         /// <response code="201">event created</response>
-        /// <response code="400">event can not be created</response>
+        /// <response code="400">event can not be created, field invalid</response>
+        /// <response code="403">invalid session</response>
         [HttpPost]
         [Route("/events")]
-        public virtual async Task<IActionResult > AddEvent([FromHeader][Required()] string sessionToken, [FromQuery][Required()] string title, [FromQuery][Required()] string name, [FromQuery][Required()] int? freePlace, [FromQuery][Required()] int? startTime, [FromQuery][Required()] int? endTime, [FromQuery][Required()] string latitude, [FromQuery][Required()] string longitude, [FromQuery][Required()] List<long?> categories, [FromQuery] string? placeSchema)
+        public virtual async Task<IActionResult > AddEvent([FromHeader][Required()] string sessionToken, [FromBody] EventFormDTO body)
         {
             var organizer = _helper.Validate(sessionToken);
-            if (organizer is null) return StatusCode(400);
-            if (freePlace is null || startTime is null || endTime is null)
+            if (organizer is null) return StatusCode(403);
+            if (body.MaxPlace is null || body.StartTime is null || body.EndTime is null)
             {
                 return StatusCode(400);
             }
-            if (title.Length == 0 || title.Length > 250 || latitude.Length == 0 || latitude.Length > 20 ||
-                longitude.Length == 0 || longitude.Length > 20) return StatusCode(400);
-            int exisitng_categories_cnt =  _dionizosDataContext.Categories.Where(c => categories.Contains(c.Id)).Count();
-            if (exisitng_categories_cnt != categories.Count) return StatusCode(400);
-            if (freePlace < 0) return StatusCode(400);
-            if (startTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) return StatusCode(400);
-            if (endTime < startTime) return StatusCode(400);
-            if (endTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds())return StatusCode(400);
+            if (body.Title.Length == 0 || body.Title.Length > 250 || body.Latitude.Length == 0 || body.Latitude.Length > 20 ||
+                body.Longitude.Length == 0 || body.Longitude.Length > 20) return StatusCode(400);
+            int exisitng_categories_cnt =  _dionizosDataContext.Categories.Where(c => body.CategoriesIds.Contains((int)c.Id)).Count();
+            if (exisitng_categories_cnt != body.CategoriesIds.Count) return StatusCode(400);
+            if (body.MaxPlace < 0) return StatusCode(400);
+            if (body.StartTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) return StatusCode(400);
+            if (body.EndTime < body.StartTime) return StatusCode(400);
+            if (body.EndTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds())return StatusCode(400);
 
             Event newEvent = new Event();
-            newEvent.Title = title;
-            newEvent.Latitude = latitude;
-            newEvent.Longitude = longitude;
+            newEvent.Title = body.Title;
+            newEvent.Latitude = body.Latitude;
+            newEvent.Longitude = body.Longitude;
             newEvent.Owner = organizer.Id;
-            newEvent.Name = name;
-            newEvent.Starttime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(startTime.Value).DateTime, DateTimeKind.Unspecified);
-            newEvent.Endtime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(endTime.Value).DateTime, DateTimeKind.Unspecified);
-            newEvent.Placecapacity = (int)freePlace;
+            newEvent.Name = body.Name;
+            newEvent.Starttime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(body.StartTime.Value).DateTime, DateTimeKind.Unspecified);
+            newEvent.Endtime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(body.EndTime.Value).DateTime, DateTimeKind.Unspecified);
+            newEvent.Placecapacity = (int) body.MaxPlace;
             newEvent.Status = (int)EventStatus.InFutureEnum;
-            newEvent.Placeschema = placeSchema ?? "";
+            newEvent.Placeschema = body.PlaceSchema ?? "";
 
             await _dionizosDataContext.Events.AddAsync(newEvent);
             await _dionizosDataContext.SaveChangesAsync(); //aby uzyskac id eventu
 
             //add categories table
-            foreach (var category in categories)
+            foreach (var category in body.CategoriesIds)
             {
                 Eventincategory eventincategory = new Eventincategory();
-                eventincategory.CategoriesId = category.Value;
+                eventincategory.CategoriesId = (long) category!;
                 eventincategory.EventId = newEvent.Id;
                 await _dionizosDataContext.Eventincategories.AddAsync(eventincategory);
             }
 
             await _dionizosDataContext.SaveChangesAsync();
-            EventDTO dto = newEvent.AsDto(true);
-            return StatusCode(200, dto);
+            EventDTO dto = newEvent.AsDto();
+            return StatusCode(201, dto);
         }
 
         /// <summary>
         /// Cancel event
         /// </summary>
-        /// <param name="sessionToken">session Token</param>
-        /// <param name="id">id of EventDTO</param>
+        /// <param name="id">id of Event</param>
         /// <response code="204">deleted</response>
+        /// <response code="403">invalid session</response>
         /// <response code="404">id not found</response>
         [HttpDelete]
         [Route("/events/{id}")]
-        public virtual IActionResult CancelEvent([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id)
+        public virtual IActionResult CancelEvent([FromHeader][Required()] string sessionToken, [FromRoute][Required] string id)
         {
-
             //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(204);
+
+            //TODO: Uncomment the next line to return response 403 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
+            // return StatusCode(403);
+
             //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(404);
 
@@ -125,13 +122,13 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">Invalid category ID supplied</response>
         [HttpGet]
         [Route("/events/getByCategory")]
-        public virtual async Task<IActionResult> GetByCategory([FromQuery (Name = "categoryId")][Required()]long categoryId)
+        public virtual async Task<IActionResult> GetByCategory([FromHeader][Required()] long? categoryId)
         {
             if (categoryId < 1) return StatusCode(400);
             List<Eventincategory> eInC = await _dionizosDataContext.Eventincategories.Include(x => x.Event)
                                                                                      .Where(x => x.CategoriesId == categoryId)
                                                                                      .ToListAsync();
-            return new ObjectResult(eInC.Select(x => x.Event.AsDto(false)).ToList());
+            return new ObjectResult(eInC.Select(x => x.Event.AsDto()).ToList());
         }
 
         /// <summary>
@@ -144,14 +141,14 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">EventDTO not found</response>
         [HttpGet]
         [Route("/events/{id}")]
-        public virtual async Task<IActionResult> GetEventById([FromRoute (Name = "id")][Required]long id)
+        public virtual async Task<IActionResult> GetEventById([FromRoute][Required] long? id)
         {
             if (id < 1) return StatusCode(400);
 
 
             Event? e = await _dionizosDataContext.Events.FirstOrDefaultAsync(x => x.Id == id);
             if(e is null) return StatusCode(404);
-            return new ObjectResult(e.AsDto(true));
+            return new ObjectResult(e.AsDtoWithPlace());
         }
 
         /// <summary>
@@ -162,7 +159,7 @@ namespace Org.OpenAPITools.Controllers
         [Route("/events")]
         public virtual async Task<IActionResult> GetEvents()
         {
-            List<EventDTO> events = _dionizosDataContext.Events.Select(x => x.AsDto(false)).ToList();
+            List<EventDTO> events = _dionizosDataContext.Events.Select(x => x.AsDto()).ToList();
 
             return new ObjectResult(events);
         }
@@ -170,39 +167,41 @@ namespace Org.OpenAPITools.Controllers
         /// <summary>
         /// Return list of events made by organizer, according to session
         /// </summary>
-        /// <param name="sessionToken">session Token</param>
         /// <response code="200">successful operation</response>
+        /// <response code="403">invalid session</response>
         [HttpGet]
         [Route("/events/my")]
         public virtual async Task<IActionResult> GetMyEvents([FromHeader][Required()]string sessionToken)
         {
 
             var organizer = _helper.Validate(sessionToken);
-            if (organizer is null) return StatusCode(400);
+            if (organizer is null) return StatusCode(403);
 
             List<EventDTO> events = await _dionizosDataContext.Events.Where(x => x.Owner == organizer.Id)
-                                                                     .Select(x => x.AsDto(false)).ToListAsync();
+                                                                     .Select(x => x.AsDto()).ToListAsync();
             return new ObjectResult(events);
         }
 
         /// <summary>
         /// patch existing event
         /// </summary>
-        /// <param name="sessionToken">session Token</param>
-        /// <param name="id">id of EventDTO</param>
-        /// <param name="_event">Update an existent user in the store</param>
+        /// <param name="id">id of Event</param>
+        /// <param name="body">Update an existent user in the store</param>
+        /// <response code="200">nothing to do, no field to patch</response>
         /// <response code="202">patched</response>
+        /// <response code="400">invalid id or fields in body</response>
+        /// <response code="403">invalid session</response>
         /// <response code="404">id not found</response>
         [HttpPatch]
         [Route("/events/{id}")]
         [Consumes("application/json")]
-        public virtual async Task<IActionResult> PatchEvent([FromHeader][Required()]string sessionToken, [FromRoute (Name = "id")][Required]string id, [FromBody]EventDTO _event)
+        public virtual async Task<IActionResult> PatchEvent([FromHeader][Required()] string sessionToken, [FromRoute][Required] string id, [FromBody] EventPatchDTO body)
         {
             Organizer? organizer = _helper.Validate(sessionToken);
             // check if validated session
             if(organizer == null)
             {
-                return StatusCode(404);
+                return StatusCode(403);
             }
 
             long Id = long.Parse(id);
@@ -211,27 +210,30 @@ namespace Org.OpenAPITools.Controllers
                                                         && x.Id == Id)
                                                       .FirstOrDefaultAsync();
             // Check if event with provided ID exists
-            if(@event == null
-                || @event.Id != _event.Id)
+            if(@event == null)
             {
                 return StatusCode(404);
             }
 
+
+            //TODO: SPRAWDZENIE POPRAWNOSCI POL I ZWROTKA 400
+            //TODO: ZWROTKA 200 jesli nic nie zmienione.
+
             // Update time
-            if (!string.IsNullOrEmpty(_event.Title)) @event.Title = _event.Title;
-            if (!string.IsNullOrEmpty(_event.Name)) @event.Name = _event.Name;
-            if (_event.StartTime != null) @event.Starttime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(_event.StartTime.Value).DateTime, DateTimeKind.Unspecified);
-            if (_event.EndTime != null) @event.Endtime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(_event.EndTime.Value).DateTime, DateTimeKind.Unspecified);
-            if(!string.IsNullOrEmpty(_event.Latitude)) @event.Latitude = _event.Latitude;
-            if(!string.IsNullOrEmpty(_event.Longitude)) @event.Longitude = _event.Longitude;
-            if(!string.IsNullOrEmpty(_event.PlaceSchema)) @event.Placeschema = _event.PlaceSchema;
+            if (!string.IsNullOrEmpty(body.Title)) @event.Title = body.Title;
+            if (!string.IsNullOrEmpty(body.Name)) @event.Name = body.Name;
+            if (body.StartTime != null) @event.Starttime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(body.StartTime.Value).DateTime, DateTimeKind.Unspecified);
+            if (body.EndTime != null) @event.Endtime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(body.EndTime.Value).DateTime, DateTimeKind.Unspecified);
+            if(!string.IsNullOrEmpty(body.Latitude)) @event.Latitude = body.Latitude;
+            if(!string.IsNullOrEmpty(body.Longitude)) @event.Longitude = body.Longitude;
+            if(!string.IsNullOrEmpty(body.PlaceSchema)) @event.Placeschema = body.PlaceSchema;
             //TODO: nie mo¿e byæ mniej ni¿ by³o - bo mog¹ byæ juz zajête
-            if(_event.MaxPlace != null) @event.Placecapacity = (int)_event.MaxPlace.Value;
+            if(body.MaxPlace != null) @event.Placecapacity = (int)body.MaxPlace.Value;
 
             _dionizosDataContext.Update(@event);
             await _dionizosDataContext.SaveChangesAsync();
 
-            EventDTO dto = @event.AsDto(false);
+            EventDTO dto = @event.AsDto();
             return StatusCode(202, dto);
         }
     }

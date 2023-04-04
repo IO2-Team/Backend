@@ -17,7 +17,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Org.OpenAPITools.Converters;
 
 namespace Org.OpenAPITools.Models
 { 
@@ -25,23 +24,21 @@ namespace Org.OpenAPITools.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class PlaceDTO : IEquatable<PlaceDTO>
-    {
+    public partial class OrganizerPatchDTO : IEquatable<OrganizerPatchDTO>
+    { 
         /// <summary>
-        /// Gets or Sets Id
+        /// Gets or Sets Name
         /// </summary>
-        [Required]
 
-        [DataMember(Name = "id")]
-        public long? Id { get; set; }
+        [DataMember(Name="name")]
+        public string Name { get; set; }
 
         /// <summary>
-        /// Gets or Sets Free
+        /// Gets or Sets Password
         /// </summary>
-        [Required]
 
-        [DataMember(Name = "free")]
-        public bool? Free { get; set; }
+        [DataMember(Name="password")]
+        public string Password { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -50,9 +47,9 @@ namespace Org.OpenAPITools.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class PlaceDTO {\n");
-            sb.Append("  Id: ").Append(Id).Append("\n");
-            sb.Append("  Free: ").Append(Free).Append("\n");
+            sb.Append("class OrganizerPatchDTO {\n");
+            sb.Append("  Name: ").Append(Name).Append("\n");
+            sb.Append("  Password: ").Append(Password).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -75,29 +72,29 @@ namespace Org.OpenAPITools.Models
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((PlaceDTO)obj);
+            return obj.GetType() == GetType() && Equals((OrganizerPatchDTO)obj);
         }
 
         /// <summary>
-        /// Returns true if PlaceDTO instances are equal
+        /// Returns true if OrganizerPatchDTO instances are equal
         /// </summary>
-        /// <param name="other">Instance of PlaceDTO to be compared</param>
+        /// <param name="other">Instance of OrganizerPatchDTO to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PlaceDTO other)
+        public bool Equals(OrganizerPatchDTO other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
 
             return 
                 (
-                    Id == other.Id ||
-                    Id != null &&
-                    Id.Equals(other.Id)
+                    Name == other.Name ||
+                    Name != null &&
+                    Name.Equals(other.Name)
                 ) && 
                 (
-                    Free == other.Free ||
-                    Free != null &&
-                    Free.Equals(other.Free)
+                    Password == other.Password ||
+                    Password != null &&
+                    Password.Equals(other.Password)
                 );
         }
 
@@ -111,10 +108,10 @@ namespace Org.OpenAPITools.Models
             {
                 var hashCode = 41;
                 // Suitable nullity checks etc, of course :)
-                    if (Id != null)
-                    hashCode = hashCode * 59 + Id.GetHashCode();
-                    if (Free != null)
-                    hashCode = hashCode * 59 + Free.GetHashCode();
+                    if (Name != null)
+                    hashCode = hashCode * 59 + Name.GetHashCode();
+                    if (Password != null)
+                    hashCode = hashCode * 59 + Password.GetHashCode();
                 return hashCode;
             }
         }
@@ -122,12 +119,12 @@ namespace Org.OpenAPITools.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(PlaceDTO left, PlaceDTO right)
+        public static bool operator ==(OrganizerPatchDTO left, OrganizerPatchDTO right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(PlaceDTO left, PlaceDTO right)
+        public static bool operator !=(OrganizerPatchDTO left, OrganizerPatchDTO right)
         {
             return !Equals(left, right);
         }

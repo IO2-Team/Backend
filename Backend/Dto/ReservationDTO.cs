@@ -29,19 +29,25 @@ namespace Org.OpenAPITools.Models
         /// <summary>
         /// Gets or Sets EventId
         /// </summary>
-        [DataMember(Name="eventId", EmitDefaultValue=true)]
-        public long EventId { get; set; }
+        [Required]
+
+        [DataMember(Name = "eventId")]
+        public long? EventId { get; set; }
 
         /// <summary>
         /// Gets or Sets PlaceId
         /// </summary>
-        [DataMember(Name="placeId", EmitDefaultValue=true)]
-        public long PlaceId { get; set; }
+        [Required]
+
+        [DataMember(Name = "placeId")]
+        public long? PlaceId { get; set; }
 
         /// <summary>
         /// Gets or Sets ReservationToken
         /// </summary>
-        [DataMember(Name="reservationToken", EmitDefaultValue=false)]
+        [Required]
+
+        [DataMember(Name = "reservationToken")]
         public string ReservationToken { get; set; }
 
         /// <summary>

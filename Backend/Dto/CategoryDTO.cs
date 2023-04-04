@@ -10,6 +10,7 @@
 
 using System.Text;
 using System.Runtime.Serialization;
+using System.ComponentModel.DataAnnotations;
 
 namespace Org.OpenAPITools.Models
 {
@@ -22,13 +23,15 @@ namespace Org.OpenAPITools.Models
         /// <summary>
         /// Gets or Sets Id
         /// </summary>
-        [DataMember(Name="id", EmitDefaultValue=true)]
-        public long Id { get; set; }
+        [Required]
+        [DataMember(Name = "id")]
+        public long? Id { get; set; }
 
         /// <summary>
         /// Gets or Sets Name
         /// </summary>
-        [DataMember(Name="name", EmitDefaultValue=false)]
+        [Required]
+        [DataMember(Name = "name")]
         public string Name { get; set; }
 
         /// <summary>

@@ -41,13 +41,14 @@ namespace Org.OpenAPITools.Controllers
         /// <param name="categoryName">name of category</param>
         /// <response code="201">created</response>
         /// <response code="400">category already exist</response>
+        /// <response code="403">invalid session</response>
         [HttpPost]
         [Route("/categories")]
         public virtual async Task<IActionResult> AddCategories([FromHeader] [Required()] string sessionToken,
-            [FromQuery(Name = "categoryName")] [Required()] string categoryName)
+            [FromHeader][Required()]string categoryName)
         {
             var organizer = _helper.Validate(sessionToken);
-            if (organizer is null) return StatusCode(400);
+            if (organizer is null) return StatusCode(403);
             if (categoryName.Length < 2 || categoryName.Length > 250) return StatusCode(400);
 
 
