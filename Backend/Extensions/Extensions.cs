@@ -18,13 +18,7 @@ namespace dionizos_backend_app.Extensions
                 Id = organizer.Id,
                 Email = organizer.Email,
                 Name = organizer.Name,
-                Password = "",
-                Status = (OrganizerDTO.StatusEnum)organizer.Status,
-                Events = context.Events
-                                .Where(x => x.Owner == organizer.Id)
-                                .AsEnumerable()
-                                .Select(x => x.AsDto(false))
-                                .ToList(),
+                Status = (OrganizerDTO.StatusEnum)organizer.Status
             };
         }
 
