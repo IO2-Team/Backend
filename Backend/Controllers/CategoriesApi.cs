@@ -41,6 +41,7 @@ namespace Org.OpenAPITools.Controllers
         /// <param name="categoryName">name of category</param>
         /// <response code="201">created</response>
         /// <response code="400">category already exist</response>
+        /// <response code="403">invalid session</response>
         [HttpPost]
         [Route("/categories")]
         public virtual async Task<IActionResult> AddCategories([FromHeader] [Required()] string sessionToken,
