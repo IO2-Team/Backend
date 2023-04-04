@@ -43,7 +43,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">token not found</response>
         [HttpDelete]
         [Route("/reservation")]
-        public virtual async Task<IActionResult> DeleteReservation([FromQuery (Name = "reservationToken")][Required()]string reservationToken)
+        public virtual async Task<IActionResult> DeleteReservation([FromHeader][Required()]string reservationToken)
         {
             Reservaton? res = await _dionizosDataContext.Reservatons.FirstOrDefaultAsync(x => x.Token == reservationToken);
             if(res is null) StatusCode(404);
@@ -62,7 +62,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">event not exist or done</response>
         [HttpPost]
         [Route("/reservation")]
-        public virtual async Task<IActionResult> MakeReservation([FromQuery (Name = "eventId")][Required()]long eventId, [FromQuery (Name = "placeID")]long? placeID)
+        public virtual async Task<IActionResult> MakeReservation([FromHeader][Required()]long? eventId, [FromHeader]long? placeID)
         {
             if (eventId < 1) return StatusCode(404);
             Event? e = await _dionizosDataContext.Events.Include(e => e.Reservatons).FirstOrDefaultAsync(x => x.Id == eventId);
