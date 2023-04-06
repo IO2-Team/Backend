@@ -15,6 +15,7 @@ using dionizos_backend_app;
 using dionizos_backend_app.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Org.OpenAPITools.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -44,10 +45,15 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="403">invalid session</response>
         [HttpPost]
         [Route("/categories")]
-        public virtual async Task<IActionResult> AddCategories([FromHeader] [Required()] string sessionToken,
-            [FromHeader][Required()]string categoryName)
+        [SwaggerOperation("AddCategories")]
+        [SwaggerResponse(statusCode: 201, type: typeof(CategoryDTO), description: "created")]
+        [SwaggerResponse(statusCode: 400, type: typeof(void), description: "")]
+        public virtual async Task<IActionResult> AddCategories([FromHeader][Required()]string categoryName)
         {
-            var organizer = _helper.Validate(sessionToken);
+            // no auth currently
+            //var organizer = _helper.Validate(sessionToken);
+            var organizer = await _dionizosDataContext.Organizers.FirstOrDefaultAsync();
+
             if (organizer is null) return StatusCode(403);
             if (categoryName.Length < 2 || categoryName.Length > 250) return StatusCode(400);
 
@@ -68,11 +74,13 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="200">successful operation</response>
         [HttpGet]
         [Route("/categories")]
+        [SwaggerOperation("GetCategories")]
+        [SwaggerResponse(statusCode: 200, type: typeof(List<CategoryDTO>), description: "successful operation")]
         public virtual async Task<IActionResult> GetCategories()
         {
             List<CategoryDTO> categories = await _dionizosDataContext.Categories.Select(x => x.AsDto())
                                                                                 .ToListAsync();
-            return new ObjectResult(categories);
+            return StatusCode(200, categories);
         }
     }
 }
