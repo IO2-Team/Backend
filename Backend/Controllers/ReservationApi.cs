@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -43,6 +44,9 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">token not found</response>
         [HttpDelete]
         [Route("/reservation")]
+        [SwaggerOperation("DeleteReservation")]
+        [SwaggerResponse(statusCode: 204, type: typeof(void), description: "deleted")]
+        [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not Found")]
         public virtual async Task<IActionResult> DeleteReservation([FromHeader][Required()]string reservationToken)
         {
             Reservaton? res = await _dionizosDataContext.Reservatons.FirstOrDefaultAsync(x => x.Token == reservationToken);
@@ -62,6 +66,10 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">event not exist or done</response>
         [HttpPost]
         [Route("/reservation")]
+        [SwaggerOperation("MakeReservation")]
+        [SwaggerResponse(statusCode: 201, type: typeof(ReservationDTO), description: "created")]
+        [SwaggerResponse(statusCode: 400, type: typeof(void), description: "No free place")]
+        [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Event does not exist/ is done")]
         public virtual async Task<IActionResult> MakeReservation([FromHeader][Required()]long? eventId, [FromHeader]long? placeID)
         {
             if (eventId < 1) return StatusCode(404);

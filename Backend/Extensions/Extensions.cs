@@ -47,23 +47,6 @@ namespace dionizos_backend_app.Extensions
             };
         }
 
-        public static EventFormDTO AsFormDto(this Event ev)
-        {
-            DionizosDataContext context = new();
-            var busyPlaces = context.Reservatons.Where(r => r.EventId == ev.Id).Select(r => r.PlaceId).ToArray();
-            return new EventFormDTO()
-            {
-                MaxPlace = ev.Placecapacity,
-                Title = ev.Title,
-                StartTime = ((DateTimeOffset)DateTime.SpecifyKind(ev.Starttime, DateTimeKind.Utc)).ToUnixTimeSeconds(),
-                EndTime = ((DateTimeOffset)DateTime.SpecifyKind(ev.Endtime, DateTimeKind.Utc)).ToUnixTimeSeconds(),
-                Name = ev.Name ?? "unknown",
-                PlaceSchema = ev.Placeschema ?? "",
-                Latitude = ev.Latitude,
-                Longitude = ev.Longitude,
-            };
-        }
-
         public static EventWithPlacesDTO AsDtoWithPlace(this Event ev)
         {
             DionizosDataContext context = new();

@@ -47,7 +47,7 @@ namespace Org.OpenAPITools.Controllers
         [HttpPost]
         [Route("/events")]
         [SwaggerOperation("AddEvent")]
-        [SwaggerResponse(statusCode: 201, type: typeof(EventFormDTO), description: "event created")]
+        [SwaggerResponse(statusCode: 201, type: typeof(EventDTO), description: "event created")]
         [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid field")]
         [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Unauthoraized")]
         public virtual async Task<IActionResult> AddEvent([FromBody] EventFormDTO body)
@@ -95,7 +95,7 @@ namespace Org.OpenAPITools.Controllers
             }
 
             await _dionizosDataContext.SaveChangesAsync();
-            EventFormDTO dto = newEvent.AsFormDto();
+            EventDTO dto = newEvent.AsDto();
             return StatusCode(201, dto);
         }
 
@@ -135,7 +135,7 @@ namespace Org.OpenAPITools.Controllers
         [HttpGet]
         [Route("/events/getByCategory")]
         [SwaggerOperation("GetByCategory")]
-        [SwaggerResponse(statusCode: 200, type: typeof(List<EventFormDTO>), description: "successful operation")]
+        [SwaggerResponse(statusCode: 200, type: typeof(List<EventDTO>), description: "successful operation")]
         [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid category ID")]
         public virtual async Task<IActionResult> GetByCategory([FromHeader][Required()] long? categoryId)
         {
@@ -143,7 +143,7 @@ namespace Org.OpenAPITools.Controllers
             List<Eventincategory> eInC = await _dionizosDataContext.Eventincategories.Include(x => x.Event)
                                                                                      .Where(x => x.CategoriesId == categoryId)
                                                                                      .ToListAsync();
-            return new ObjectResult(eInC.Select(x => x.Event.AsFormDto()).ToList());
+            return new ObjectResult(eInC.Select(x => x.Event.AsDto()).ToList());
         }
 
         /// <summary>
@@ -177,10 +177,10 @@ namespace Org.OpenAPITools.Controllers
         [HttpGet]
         [Route("/events")]
         [SwaggerOperation("GetEvents")]
-        [SwaggerResponse(statusCode: 200, type: typeof(List<EventFormDTO>), description: "successful operation")]
+        [SwaggerResponse(statusCode: 200, type: typeof(List<EventDTO>), description: "successful operation")]
         public virtual async Task<IActionResult> GetEvents()
         {
-            List<EventFormDTO> events = _dionizosDataContext.Events.Select(x => x.AsFormDto()).ToList();
+            List<EventDTO> events = _dionizosDataContext.Events.Select(x => x.AsDto()).ToList();
 
             return new ObjectResult(events);
         }
@@ -193,7 +193,7 @@ namespace Org.OpenAPITools.Controllers
         [HttpGet]
         [Route("/events/my")]
         [SwaggerOperation("GetMyEvents")]
-        [SwaggerResponse(statusCode: 200, type: typeof(List<EventFormDTO>), description: "successful operation")]
+        [SwaggerResponse(statusCode: 200, type: typeof(List<EventDTO>), description: "successful operation")]
         [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Invalid session")]
         public virtual async Task<IActionResult> GetMyEvents()
         {
@@ -203,8 +203,8 @@ namespace Org.OpenAPITools.Controllers
 
             if (organizer is null) return StatusCode(403);
 
-            List<EventFormDTO> events = await _dionizosDataContext.Events.Where(x => x.Owner == organizer.Id)
-                                                                     .Select(x => x.AsFormDto()).ToListAsync();
+            List<EventDTO> events = await _dionizosDataContext.Events.Where(x => x.Owner == organizer.Id)
+                                                                     .Select(x => x.AsDto()).ToListAsync();
             return StatusCode(200, events);
         }
 

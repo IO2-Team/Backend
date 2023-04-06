@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -42,10 +43,17 @@ namespace Org.OpenAPITools.Controllers
         /// </summary>
         /// <param name="id">id of OrganizerDTO</param>
         /// <param name="code">code from email</param>
-        /// <response code="201">account confirmed</response>
+        /// <response code="200">nothing to do, account already confirmed</response>
+        /// <response code="202">account confirmed</response>
         /// <response code="400">code wrong</response>
+        /// <response code="404">organizer id not found</response>
         [HttpPost]
         [Route("/organizer/{id}")]
+        [SwaggerOperation("Confirm")]
+        [SwaggerResponse(statusCode: 200, type: typeof(void), description: "Account already confirmed")]
+        [SwaggerResponse(statusCode: 202, type: typeof(void), description: "Confirmed")]
+        [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Wrong code")]
+        [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not Found")]
         public virtual async Task<IActionResult> Confirm([FromRoute][Required]string id, [FromHeader][Required()]string code)
         {
             long Id = long.Parse(id);
@@ -87,12 +95,20 @@ namespace Org.OpenAPITools.Controllers
         /// <param name="sessionToken">session Token</param>
         /// <param name="id">id of OrganizerDTO</param>
         /// <response code="204">deleted</response>
+        /// <response code="403">invalid session</response>
         /// <response code="404">id not found</response>
         [HttpDelete]
         [Route("/organizer/{id}")]
-        public virtual async Task<IActionResult> DeleteOrganizer([FromHeader][Required()]string sessionToken, [FromRoute][Required]string id)
+        [SwaggerOperation("DeleteOrganizer")]
+        [SwaggerResponse(statusCode: 204, type: typeof(void), description: "Deleted")]
+        [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Invalid session")]
+        [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not Found")]
+        public virtual async Task<IActionResult> DeleteOrganizer([FromRoute][Required]string id)
         {
-            Organizer? organizer = _helper.Validate(sessionToken);
+            // no auth currently
+            //var organizer = _helper.Validate(sessionToken);
+            var organizer = await _context.Organizers.FirstOrDefaultAsync();
+
             // Validate session
             if(organizer == null)
             {
@@ -138,6 +154,9 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">Invalid email/password supplied</response>
         [HttpGet]
         [Route("/organizer/login")]
+        [SwaggerOperation("LoginOrganizer")]
+        [SwaggerResponse(statusCode: 200, type: typeof(SessionResponseDTO), description: "successful operation")]
+        [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid email/password")]
         public virtual async Task<IActionResult> LoginOrganizer([FromHeader][Required()]string email, [FromHeader][Required()]string password)
         {
             // Check if organizer exists
@@ -178,14 +197,26 @@ namespace Org.OpenAPITools.Controllers
         /// <param name="sessionToken">session Token</param>
         /// <param name="id">id of OrganizerDTO</param>
         /// <param name="organizer">Update an existent user in the store</param>
+        /// <response code="200">nothing to do, no field to patch</response>
         /// <response code="202">patched</response>
+        /// <response code="400">invalid email or password</response>
+        /// <response code="403">invalid session</response>
         /// <response code="404">id not found</response>
         [HttpPatch]
         [Route("/organizer/{id}")]
         [Consumes("application/json")]
-        public virtual async Task<IActionResult> PatchOrganizer([FromHeader][Required()]string sessionToken, [FromRoute][Required]string id, [FromBody]OrganizerPatchDTO body)
+        [SwaggerOperation("PatchOrganizer")]
+        [SwaggerResponse(statusCode: 200, type: typeof(void), description: "No field to patch")]
+        [SwaggerResponse(statusCode: 202, type: typeof(void), description: "Patched")]
+        [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid email or password")]
+        [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Invalid session")]
+        [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not found")]
+        public virtual async Task<IActionResult> PatchOrganizer([FromRoute][Required]string id, [FromBody]OrganizerPatchDTO body)
         {
-            Organizer? validatedOrganizer = _helper.Validate(sessionToken);
+            // no auth currently
+            //var organizer = _helper.Validate(sessionToken);
+            var validatedOrganizer = await _context.Organizers.FirstOrDefaultAsync();
+
             if(validatedOrganizer == null)
             {
                 // not authenticated / wrong id
@@ -205,8 +236,7 @@ namespace Org.OpenAPITools.Controllers
             if(!string.IsNullOrEmpty(body.Password)) validatedOrganizer.Password = Extensions.EncryptPass(body.Password);
 
             await _context.SaveChangesAsync();
-            OrganizerDTO dto = validatedOrganizer.AsDto();
-            return StatusCode(202, dto);
+            return StatusCode(202);
         }
 
         /// <summary>
@@ -217,9 +247,15 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">invalid session</response>
         [HttpGet]
         [Route("/organizer")]
-        public virtual IActionResult GetOrganizer([FromHeader][Required()] string sessionToken)
+        [SwaggerOperation("GetOrganizer")]
+        [SwaggerResponse(statusCode: 200, type: typeof(OrganizerDTO), description: "successful operation")]
+        [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid session operation")]
+        public virtual async Task<IActionResult> GetOrganizer()
         {
-            Organizer? organizer = _helper.Validate(sessionToken);
+            // no auth currently
+            //var organizer = _helper.Validate(sessionToken);
+            var organizer = await _context.Organizers.FirstOrDefaultAsync();
+
             if (organizer == null)
             {
                 return StatusCode(403);
@@ -238,6 +274,9 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">organizer already exist</response>
         [HttpPost]
         [Route("/organizer")]
+        [SwaggerOperation("SignUp")]
+        [SwaggerResponse(statusCode: 201, type: typeof(OrganizerDTO), description: "successful operation")]
+        [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Organizer already exists")]
         public virtual async Task<IActionResult> SignUp([FromBody]OrganizerFormDTO body)
         {
             async Task GenerateEmailcode(DionizosDataContext _context, Organizer organizer)
