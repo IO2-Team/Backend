@@ -54,9 +54,8 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Unauthoraized")]
         public virtual async Task<IActionResult> AddEvent([FromBody] EventFormDTO body)
         {
-            // no auth currently
-            //var organizer = _helper.Validate(sessionToken);
-            var organizer = await _dionizosDataContext.Organizers.FirstOrDefaultAsync();
+            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
+            var organizer = _helper.Validate(sessionToken!);
 
             if (organizer is null) return StatusCode(403);
             if (body.MaxPlace is null || body.StartTime is null || body.EndTime is null)
@@ -115,18 +114,22 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 204, type: typeof(void), description: "deleted")]
         [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Unauthorized")]
         [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not found")]
-        public virtual IActionResult CancelEvent([FromRoute][Required] string id)
+        public virtual async Task<IActionResult> CancelEvent([FromRoute][Required] string id)
         {
-            //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(204);
+            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
+            Organizer organizer = _helper.Validate(sessionToken!)!;
 
-            //TODO: Uncomment the next line to return response 403 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(403);
+            long Id = long.Parse(id);
+            Event? @event = organizer.Events.FirstOrDefault(x => x.Id == Id);
+            if(@event == null
+                || @event.Status != (int)EventStatus.InFutureEnum)
+            {
+                return StatusCode(404);
+            }
 
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
-
-            throw new NotImplementedException();
+            @event.Status = (int)EventStatus.CancelledEnum;
+            await _dionizosDataContext.SaveChangesAsync();
+            return StatusCode(204);
         }
 
         /// <summary>
@@ -201,9 +204,8 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Invalid session")]
         public virtual async Task<IActionResult> GetMyEvents()
         {
-            // no auth currently
-            //var organizer = _helper.Validate(sessionToken);
-            var organizer = await _dionizosDataContext.Organizers.FirstOrDefaultAsync();
+            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
+            var organizer = _helper.Validate(sessionToken!);
 
             if (organizer is null) return StatusCode(403);
 
@@ -233,9 +235,8 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not found")]
         public virtual async Task<IActionResult> PatchEvent([FromRoute][Required] string id, [FromBody] EventPatchDTO body)
         {
-            // no auth currently
-            //var organizer = _helper.Validate(sessionToken);
-            var organizer = await _dionizosDataContext.Organizers.FirstOrDefaultAsync();
+            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
+            var organizer = _helper.Validate(sessionToken!);
 
             // check if validated session
             if(organizer == null)
@@ -254,22 +255,48 @@ namespace Org.OpenAPITools.Controllers
                 return StatusCode(404);
             }
 
-
-            //TODO: SPRAWDZENIE POPRAWNOSCI POL I ZWROTKA 400
-            //TODO: ZWROTKA 200 jesli nic nie zmienione.
-
             // Update time
             if (!string.IsNullOrEmpty(body.Title)) @event.Title = body.Title;
             if (!string.IsNullOrEmpty(body.Name)) @event.Name = body.Name;
-            if (body.StartTime != null) @event.Starttime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(body.StartTime.Value).DateTime, DateTimeKind.Unspecified);
-            if (body.EndTime != null) @event.Endtime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(body.EndTime.Value).DateTime, DateTimeKind.Unspecified);
+
+            if (body.StartTime != null)
+            {
+                DateTime newStartTime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(body.StartTime.Value).DateTime, DateTimeKind.Unspecified);
+                if(newStartTime < DateTime.Now)
+                {
+                    return StatusCode(400);
+                }
+
+                @event.Starttime = newStartTime;
+            }
+            if (body.EndTime != null)
+            {
+                DateTime newEndTime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(body.EndTime.Value).DateTime, DateTimeKind.Unspecified);
+                if(newEndTime < @event.Starttime)
+                {
+                    return StatusCode(400);
+                }
+
+                @event.Endtime = newEndTime;
+            }
+
             if(!string.IsNullOrEmpty(body.Latitude)) @event.Latitude = body.Latitude;
             if(!string.IsNullOrEmpty(body.Longitude)) @event.Longitude = body.Longitude;
             if(!string.IsNullOrEmpty(body.PlaceSchema)) @event.Placeschema = body.PlaceSchema;
-            //TODO: nie mo¿e byæ mniej ni¿ by³o - bo mog¹ byæ juz zajête
-            if(body.MaxPlace != null) @event.Placecapacity = (int)body.MaxPlace.Value;
+            if (body.MaxPlace != null)
+            {
+                if(body.MaxPlace >= @event.Placecapacity)
+                {
+                    return StatusCode(400);
+                }
+                @event.Placecapacity = (int)body.MaxPlace.Value;
+            }
 
-            _dionizosDataContext.Update(@event);
+            if (_dionizosDataContext.Entry(@event).State == EntityState.Unchanged)
+            {
+                return StatusCode(200);
+            }
+
             await _dionizosDataContext.SaveChangesAsync();
 
             return StatusCode(202);

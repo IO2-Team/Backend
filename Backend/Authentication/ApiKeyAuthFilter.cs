@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using dionizos_backend_app.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace dionizos_backend_app.Authentication
@@ -16,20 +17,32 @@ namespace dionizos_backend_app.Authentication
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            if (!context.HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var header))
+            if (!context.HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var token))
             {
-                context.Result = new UnauthorizedObjectResult("API key missing");
+                context.Result = new ObjectResult("API key missing")
+                {
+                    StatusCode = 403,
+                };
                 return;
             }
-
-            // TODO: Validate properly
 
             var apiKey = _configuration.GetValue<string>(AuthConstants.ApiKeySectionName);
-            if (!apiKey.Equals(header))
+            if (!apiKey.Equals(token))
             {
-                context.Result = new UnauthorizedObjectResult("Invalid API key");
+                context.Result = new ObjectResult("Invalid API key")
+                {
+                    StatusCode = 403,
+                };
                 return;
             }
+
+            //Organizer? organizer = _helper.Validate(token!);
+
+            //if(organizer == null)
+            //{
+            //    context.Result = new UnauthorizedObjectResult("Invalid API key");
+            //    return;
+            //}
         }
     }
 }

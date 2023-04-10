@@ -31,13 +31,15 @@ namespace Org.OpenAPITools.Controllers
         private readonly DionizosDataContext _context;
         private readonly IHelper _helper;
         private readonly IMailing _mailing;
+        private readonly ILogger _logger;
         private readonly Random _random = new();
 
-        public EventOrganizerApiController(DionizosDataContext context, IHelper helper, IMailing mailing)
+        public EventOrganizerApiController(DionizosDataContext context, IHelper helper, IMailing mailing, ILogger logger)
         {
             _context = context;
             _helper = helper;
             _mailing = mailing;
+            _logger = logger;
         }
 
         /// <summary>
@@ -107,9 +109,8 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not Found")]
         public virtual async Task<IActionResult> DeleteOrganizer([FromRoute][Required]string id)
         {
-            // no auth currently
-            //var organizer = _helper.Validate(sessionToken);
-            var organizer = await _context.Organizers.FirstOrDefaultAsync();
+            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
+            var organizer = _helper.Validate(sessionToken!);
 
             // Validate session
             if(organizer == null)
@@ -139,7 +140,7 @@ namespace Org.OpenAPITools.Controllers
             organizer.Name = organizer.Name.GetHashCode().ToString();
             organizer.Email = organizer.Email.GetHashCode().ToString();
 
-            // TODO: make him deleted.
+            organizer.Status = (int)Organizer.StatusEnum.DeletedEnum;
 
             // save in db
             await _context.SaveChangesAsync();
@@ -215,9 +216,8 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not found")]
         public virtual async Task<IActionResult> PatchOrganizer([FromRoute][Required]string id, [FromBody]OrganizerPatchDTO body)
         {
-            // no auth currently
-            //var organizer = _helper.Validate(sessionToken);
-            var validatedOrganizer = await _context.Organizers.FirstOrDefaultAsync();
+            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
+            var validatedOrganizer = _helper.Validate(sessionToken!);
 
             if(validatedOrganizer == null)
             {
@@ -233,8 +233,6 @@ namespace Org.OpenAPITools.Controllers
             }
 
             if(!string.IsNullOrEmpty(body.Name)) validatedOrganizer.Name = body.Name;
-            // TODO: (kutakw) Currently not available
-            //if (!string.IsNullOrEmpty(body.Email)) validatedOrganizer.Email = body.Email;
             if (!string.IsNullOrEmpty(body.Password)) validatedOrganizer.Password = Extensions.EncryptPass(body.Password);
 
             await _context.SaveChangesAsync();
@@ -254,9 +252,8 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid session operation")]
         public virtual async Task<IActionResult> GetOrganizer()
         {
-            // no auth currently
-            //var organizer = _helper.Validate(sessionToken);
-            var organizer = await _context.Organizers.FirstOrDefaultAsync();
+            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
+            var organizer = _helper.Validate(sessionToken!);
 
             if (organizer == null)
             {
@@ -299,7 +296,7 @@ namespace Org.OpenAPITools.Controllers
 
                 _mailing.SendEmailCode(organizer.Email, emailcode.Code);
 
-                // TODO: add to logs
+                _logger.LogInformation($"Email sent to {organizer.Email} with code '{emailcode.Code}'");
             };
             /////////////////////////////////////////////////////////////////////////
 
