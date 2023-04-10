@@ -26,23 +26,23 @@ namespace dionizos_backend_app.Authentication
                 return;
             }
 
-            var apiKey = _configuration.GetValue<string>(AuthConstants.ApiKeySectionName);
-            if (!apiKey.Equals(token))
-            {
-                context.Result = new ObjectResult("Invalid API key")
-                {
-                    StatusCode = 403,
-                };
-                return;
-            }
-
-            //Organizer? organizer = _helper.Validate(token!);
-
-            //if(organizer == null)
+            //var apiKey = _configuration.GetValue<string>(AuthConstants.ApiKeySectionName);
+            //if (!apiKey.Equals(token))
             //{
-            //    context.Result = new UnauthorizedObjectResult("Invalid API key");
+            //    context.Result = new ObjectResult("Invalid API key")
+            //    {
+            //        StatusCode = 403,
+            //    };
             //    return;
             //}
+
+            Organizer? organizer = _helper.Validate(token!);
+
+            if (organizer == null)
+            {
+                context.Result = new UnauthorizedObjectResult("Invalid API key");
+                return;
+            }
         }
     }
 }
