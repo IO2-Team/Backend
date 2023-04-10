@@ -10,8 +10,10 @@
 
 using System.ComponentModel.DataAnnotations;
 using dionizos_backend_app;
+using dionizos_backend_app.Authentication;
 using dionizos_backend_app.Extensions;
 using dionizos_backend_app.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -98,6 +100,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">id not found</response>
         [HttpDelete]
         [Route("/organizer/{id}")]
+        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [SwaggerOperation("DeleteOrganizer")]
         [SwaggerResponse(statusCode: 204, type: typeof(void), description: "Deleted")]
         [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Invalid session")]
@@ -202,6 +205,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">id not found</response>
         [HttpPatch]
         [Route("/organizer/{id}")]
+        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [Consumes("application/json")]
         [SwaggerOperation("PatchOrganizer")]
         [SwaggerResponse(statusCode: 200, type: typeof(void), description: "No field to patch")]
@@ -230,8 +234,8 @@ namespace Org.OpenAPITools.Controllers
 
             if(!string.IsNullOrEmpty(body.Name)) validatedOrganizer.Name = body.Name;
             // TODO: (kutakw) Currently not available
-            //if(!string.IsNullOrEmpty(organizer.Email)) validatedOrganizer.Email = organizer.Email;
-            if(!string.IsNullOrEmpty(body.Password)) validatedOrganizer.Password = Extensions.EncryptPass(body.Password);
+            //if (!string.IsNullOrEmpty(body.Email)) validatedOrganizer.Email = body.Email;
+            if (!string.IsNullOrEmpty(body.Password)) validatedOrganizer.Password = Extensions.EncryptPass(body.Password);
 
             await _context.SaveChangesAsync();
             return StatusCode(202);
@@ -244,6 +248,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">invalid session</response>
         [HttpGet]
         [Route("/organizer")]
+        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [SwaggerOperation("GetOrganizer")]
         [SwaggerResponse(statusCode: 200, type: typeof(OrganizerDTO), description: "successful operation")]
         [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid session operation")]

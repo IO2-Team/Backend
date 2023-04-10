@@ -10,6 +10,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using dionizos_backend_app;
+using dionizos_backend_app.Authentication;
 using dionizos_backend_app.Extensions;
 using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -46,6 +47,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="403">invalid session</response>
         [HttpPost]
         [Route("/events")]
+        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [SwaggerOperation("AddEvent")]
         [SwaggerResponse(statusCode: 201, type: typeof(EventDTO), description: "event created")]
         [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid field")]
@@ -108,6 +110,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">id not found</response>
         [HttpDelete]
         [Route("/events/{id}")]
+        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [SwaggerOperation("CancelEvent")]
         [SwaggerResponse(statusCode: 204, type: typeof(void), description: "deleted")]
         [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Unauthorized")]
@@ -192,6 +195,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="403">invalid session</response>
         [HttpGet]
         [Route("/events/my")]
+        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [SwaggerOperation("GetMyEvents")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<EventDTO>), description: "successful operation")]
         [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Invalid session")]
@@ -220,6 +224,7 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">id not found</response>
         [HttpPatch]
         [Route("/events/{id}")]
+        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [Consumes("application/json")]
         [SwaggerResponse(statusCode: 200, type: typeof(void), description: "No patch needed")]
         [SwaggerResponse(statusCode: 202, type: typeof(void), description: "Pathed")]

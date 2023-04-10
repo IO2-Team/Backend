@@ -9,11 +9,13 @@ using Quartz;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
 using System.Reflection;
+using dionizos_backend_app.Authentication;
 
 namespace dionizos_backend_app
 {
     public class Program
     {
+        [Obsolete]
         public static void Main(string[] args)
         {
             Prelaunch.GetSecrets();
@@ -80,14 +82,6 @@ namespace dionizos_backend_app
                     builder.AddSecurityDefinition("token", new OpenApiSecurityScheme
                     {
                         Type = SecuritySchemeType.ApiKey,
-                        Flows = new OpenApiOAuthFlows
-                        {
-                            ClientCredentials = new OpenApiOAuthFlow
-                            {
-                                TokenUrl = new Uri($"http://localhost:7046/connect/token"),
-                                Scopes = { { "http://localhost:7046/", "System rezerwacji miejsc na eventy" } }
-                            }
-                        },
                         Name = "sessionToken",
                         In = ParameterLocation.Header
                     });
@@ -102,12 +96,12 @@ namespace dionizos_backend_app
                                 Name = "sessionToken",
                                 In = ParameterLocation.Header
                             },
-                            new List<string>() {
-                                "http://localhost:7046/"
-                            }
+                            new List<string>() {}
                         }
                     });
                 });
+
+            builder.Services.AddScoped<ApiKeyAuthFilter>();
 
             builder.Services.AddCors();
             builder.Services.AddSingleton<IConfigurationRoot>(config);
