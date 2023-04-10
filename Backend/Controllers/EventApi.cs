@@ -180,7 +180,7 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<EventDTO>), description: "successful operation")]
         public virtual async Task<IActionResult> GetEvents()
         {
-            List<EventDTO> events = _dionizosDataContext.Events.Select(x => x.AsDto()).ToList();
+            List<EventDTO> events = await _dionizosDataContext.Events.Select(x => x.AsDto()).ToListAsync();
 
             return new ObjectResult(events);
         }

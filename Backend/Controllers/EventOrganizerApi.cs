@@ -92,7 +92,6 @@ namespace Org.OpenAPITools.Controllers
         /// <summary>
         /// Confirm orginizer account
         /// </summary>
-        /// <param name="sessionToken">session Token</param>
         /// <param name="id">id of OrganizerDTO</param>
         /// <response code="204">deleted</response>
         /// <response code="403">invalid session</response>
@@ -194,9 +193,8 @@ namespace Org.OpenAPITools.Controllers
         /// <summary>
         /// Patch orginizer account
         /// </summary>
-        /// <param name="sessionToken">session Token</param>
         /// <param name="id">id of OrganizerDTO</param>
-        /// <param name="organizer">Update an existent user in the store</param>
+        /// <param name="body">Update an existent user in the store</param>
         /// <response code="200">nothing to do, no field to patch</response>
         /// <response code="202">patched</response>
         /// <response code="400">invalid email or password</response>
@@ -242,7 +240,6 @@ namespace Org.OpenAPITools.Controllers
         /// <summary>
         /// Get organizer account (my account)
         /// </summary>
-        /// <param name="sessionToken">session Token</param>
         /// <response code="200">successful operation</response>
         /// <response code="400">invalid session</response>
         [HttpGet]
@@ -267,9 +264,7 @@ namespace Org.OpenAPITools.Controllers
         /// <summary>
         /// Create orginizer account
         /// </summary>
-        /// <param name="name">name of OrganizerDTO</param>
-        /// <param name="email">email of OrganizerDTO</param>
-        /// <param name="password">password of OrganizerDTO</param>
+        /// <param name="body">Create organizer</param>
         /// <response code="201">successful operation</response>
         /// <response code="400">organizer already exist</response>
         [HttpPost]

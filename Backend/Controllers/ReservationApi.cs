@@ -95,7 +95,7 @@ namespace Org.OpenAPITools.Controllers
             Reservaton reservaton = new Reservaton()
             {
                 EventId = e.Id,
-                PlaceId = placeID.Value,
+                PlaceId = placeID!.Value,
                 Token = token
             };
             await _dionizosDataContext.Reservatons.AddAsync(reservaton);

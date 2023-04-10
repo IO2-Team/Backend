@@ -38,7 +38,6 @@ namespace Org.OpenAPITools.Controllers
         /// <summary>
         /// Create new category
         /// </summary>
-        /// <param name="sessionToken">session Token</param>
         /// <param name="categoryName">name of category</param>
         /// <response code="201">created</response>
         /// <response code="400">category already exist</response>
