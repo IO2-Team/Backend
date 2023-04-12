@@ -100,18 +100,18 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">id not found</response>
         [HttpDelete]
         [Route("/events/{id}")]
-        public virtual IActionResult CancelEvent([FromHeader][Required()] string sessionToken, [FromRoute][Required] string id)
+        public virtual async Task<IActionResult> CancelEvent([FromHeader][Required()] string sessionToken, [FromRoute][Required] string id)
         {
-            //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(204);
-
-            //TODO: Uncomment the next line to return response 403 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(403);
-
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
-
-            throw new NotImplementedException();
+            var organizer = _helper.Validate(sessionToken);
+            if (organizer is null) return StatusCode(403);
+            List<Event> events = await _dionizosDataContext.Events.Where(x => x.Owner == organizer.Id).ToListAsync();
+            if (!events.Exists(x => x.Id == long.Parse(id) && x.Starttime < DateTime.Now))
+            {
+                return StatusCode(404); 
+            }
+            var event_selected = events.Where(x => x.Id == long.Parse(id)).First();
+            event_selected.Status = (int)EventStatus.CancelledEnum;
+            return StatusCode(204); 
         }
 
         /// <summary>
