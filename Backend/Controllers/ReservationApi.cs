@@ -74,8 +74,8 @@ namespace Org.OpenAPITools.Controllers
         {
             if (eventId < 1) return StatusCode(404);
             Event? e = await _dionizosDataContext.Events.Include(e => e.Reservatons).FirstOrDefaultAsync(x => x.Id == eventId);
-            if(e is null || e.Status == (int)EventStatus.CancelledEnum || e.Status == (int)EventStatus.DoneEnum) StatusCode(404);
-            if(e.Reservatons.Count >= e.Placecapacity) StatusCode(400);
+            if(e is null || e.Status == (int)EventStatus.CancelledEnum || e.Status == (int)EventStatus.DoneEnum) return StatusCode(404);
+            if(e.Reservatons.Count >= e.Placecapacity) return StatusCode(400);
             if(placeID is null)
             {
                 var busy = e.Reservatons.Select(x => x.PlaceId).ToList();

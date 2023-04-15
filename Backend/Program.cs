@@ -109,8 +109,10 @@ namespace dionizos_backend_app
 
             builder.Services.AddQuartz(q =>
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 q.UseMicrosoftDependencyInjectionScopedJobFactory();
-                // Just use the name of your job that you created in the Jobs folder.
+#pragma warning restore CS0618 // Type or member is obsolete
+                              // Just use the name of your job that you created in the Jobs folder.
                 var jobKey = new JobKey("RefreshEventStatus");
                 q.AddJob<RefreshEventStatus>(opts => opts.WithIdentity(jobKey));
 

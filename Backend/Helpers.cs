@@ -33,7 +33,7 @@ namespace dionizos_backend_app
                 .OrderBy(x => x.Time)
                 .LastOrDefault();
 
-            if (mostRecentSession.Id != lastSession.Id)
+            if (mostRecentSession?.Id != lastSession.Id)
             {
                 return null;
             }
@@ -50,7 +50,7 @@ namespace dionizos_backend_app
 
         private int GetSessionLengthSeconds()
         {
-            return int.Parse(_configurationRoot["SessionLengthSeconds"]);
+            return int.Parse(_configurationRoot["SessionLengthSeconds"]!);
         }
 
         public string generateRandomToken(int length)

@@ -169,7 +169,9 @@ namespace Org.OpenAPITools.Models
         /// </summary>
         /// <param name="obj">Object to be compared</param>
         /// <returns>Boolean</returns>
+#pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
         public override bool Equals(object obj)
+#pragma warning restore CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
@@ -181,11 +183,14 @@ namespace Org.OpenAPITools.Models
         /// </summary>
         /// <param name="other">Instance of EventWithPlacesDTO to be compared</param>
         /// <returns>Boolean</returns>
+#pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
         public bool Equals(EventWithPlacesDTO other)
+#pragma warning restore CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
 
+#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
             return 
                 (
                     Id == other.Id ||
@@ -252,6 +257,7 @@ namespace Org.OpenAPITools.Models
                     PlaceSchema != null &&
                     PlaceSchema.Equals(other.PlaceSchema)
                 );
+#pragma warning restore CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
         }
 
         /// <summary>
@@ -278,9 +284,11 @@ namespace Org.OpenAPITools.Models
                     hashCode = hashCode * 59 + Longitude.GetHashCode();
                     if (Name != null)
                     hashCode = hashCode * 59 + Name.GetHashCode();
-                    if (Status != null)
+#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
+                if (Status != null)
                     hashCode = hashCode * 59 + Status.GetHashCode();
-                    if (Categories != null)
+#pragma warning restore CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
+                if (Categories != null)
                     hashCode = hashCode * 59 + Categories.GetHashCode();
                     if (FreePlace != null)
                     hashCode = hashCode * 59 + FreePlace.GetHashCode();

@@ -250,7 +250,7 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerOperation("GetOrganizer")]
         [SwaggerResponse(statusCode: 200, type: typeof(OrganizerDTO), description: "successful operation")]
         [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid session operation")]
-        public virtual async Task<IActionResult> GetOrganizer()
+        public virtual IActionResult GetOrganizer()
         {
             HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
             var organizer = _helper.Validate(sessionToken!);
