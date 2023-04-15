@@ -268,7 +268,7 @@ namespace Org.OpenAPITools.Controllers
             if(!string.IsNullOrEmpty(body.PlaceSchema)) @event.Placeschema = body.PlaceSchema;
             if (body.MaxPlace != null)
             {
-                if(body.MaxPlace >= @event.Placecapacity)
+                if(body.MaxPlace < @event.Placecapacity)
                 {
                     return StatusCode(400);
                 }
