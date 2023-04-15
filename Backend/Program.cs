@@ -9,7 +9,6 @@ using Quartz;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
 using System.Reflection;
-using dionizos_backend_app.Authentication;
 
 namespace dionizos_backend_app
 {
@@ -99,8 +98,6 @@ namespace dionizos_backend_app
                         }
                     });
                 });
-
-            builder.Services.AddScoped<ApiKeyAuthFilter>();
 
             builder.Services.AddCors();
             builder.Services.AddSingleton<IConfigurationRoot>(config);

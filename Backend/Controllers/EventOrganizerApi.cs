@@ -10,7 +10,6 @@
 
 using System.ComponentModel.DataAnnotations;
 using dionizos_backend_app;
-using dionizos_backend_app.Authentication;
 using dionizos_backend_app.Extensions;
 using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -102,18 +101,17 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">id not found</response>
         [HttpDelete]
         [Route("/organizer/{id}")]
-        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [SwaggerOperation("DeleteOrganizer")]
         [SwaggerResponse(statusCode: 204, type: typeof(void), description: "Deleted")]
         [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Invalid session")]
         [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not Found")]
-        public virtual async Task<IActionResult> DeleteOrganizer([FromRoute][Required]string id)
+        public virtual async Task<IActionResult> DeleteOrganizer([FromHeader][Required()] string sessionToken, [FromRoute][Required]string id)
         {
-            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
-            var organizer = _helper.Validate(sessionToken!);
+            var organizer = _helper.Validate(sessionToken);
+            if (organizer is null) return StatusCode(403);
 
             // Validate session
-            if(organizer == null)
+            if (organizer == null)
             {
                 // invalid session
                 return StatusCode(403);
@@ -206,7 +204,6 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">id not found</response>
         [HttpPatch]
         [Route("/organizer/{id}")]
-        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [Consumes("application/json")]
         [SwaggerOperation("PatchOrganizer")]
         [SwaggerResponse(statusCode: 200, type: typeof(void), description: "No field to patch")]
@@ -214,26 +211,20 @@ namespace Org.OpenAPITools.Controllers
         [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid email or password")]
         [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Invalid session")]
         [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not found")]
-        public virtual async Task<IActionResult> PatchOrganizer([FromRoute][Required]string id, [FromBody]OrganizerPatchDTO body)
+        public virtual async Task<IActionResult> PatchOrganizer([FromHeader][Required()] string sessionToken, [FromRoute][Required]string id, [FromBody]OrganizerPatchDTO body)
         {
-            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
-            var validatedOrganizer = _helper.Validate(sessionToken!);
-
-            if(validatedOrganizer == null)
-            {
-                // not authenticated / wrong id
-                return StatusCode(403);
-            }
+            var organizer = _helper.Validate(sessionToken);
+            if (organizer is null) return StatusCode(403);
 
             long Id = long.Parse(id);
             // Check if organizer is trying to patch itself
-            if(validatedOrganizer.Id != Id)
+            if(organizer.Id != Id)
             {
                 return StatusCode(404);
             }
 
-            if(!string.IsNullOrEmpty(body.Name)) validatedOrganizer.Name = body.Name;
-            if (!string.IsNullOrEmpty(body.Password)) validatedOrganizer.Password = Extensions.EncryptPass(body.Password);
+            if(!string.IsNullOrEmpty(body.Name)) organizer.Name = body.Name;
+            if (!string.IsNullOrEmpty(body.Password)) organizer.Password = Extensions.EncryptPass(body.Password);
 
             await _context.SaveChangesAsync();
             return StatusCode(202);
@@ -246,14 +237,13 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">invalid session</response>
         [HttpGet]
         [Route("/organizer")]
-        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [SwaggerOperation("GetOrganizer")]
         [SwaggerResponse(statusCode: 200, type: typeof(OrganizerDTO), description: "successful operation")]
         [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid session operation")]
-        public virtual IActionResult GetOrganizer()
+        public virtual IActionResult GetOrganizer([FromHeader][Required()] string sessionToken)
         {
-            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
-            var organizer = _helper.Validate(sessionToken!);
+            var organizer = _helper.Validate(sessionToken);
+            if (organizer is null) return StatusCode(403);
 
             if (organizer == null)
             {

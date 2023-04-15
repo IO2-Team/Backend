@@ -16,7 +16,6 @@ using dionizos_backend_app.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Org.OpenAPITools.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using dionizos_backend_app.Authentication;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -44,17 +43,13 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">category already exist</response>
         /// <response code="403">invalid session</response>
         [HttpPost]
-        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [Route("/categories")]
         [SwaggerOperation("AddCategories")]
         [SwaggerResponse(statusCode: 201, type: typeof(CategoryDTO), description: "created")]
         [SwaggerResponse(statusCode: 400, type: typeof(void), description: "")]
-        public virtual async Task<IActionResult> AddCategories([FromHeader][Required()]string categoryName)
+        public virtual async Task<IActionResult> AddCategories([FromHeader][Required()] string sessionToken, [FromHeader][Required()]string categoryName)
         {
-            // no auth currently
-            //var organizer = _helper.Validate(sessionToken);
-            var organizer = await _dionizosDataContext.Organizers.FirstOrDefaultAsync();
-
+            var organizer = _helper.Validate(sessionToken);
             if (organizer is null) return StatusCode(403);
             if (categoryName.Length < 2 || categoryName.Length > 250) return StatusCode(400);
 

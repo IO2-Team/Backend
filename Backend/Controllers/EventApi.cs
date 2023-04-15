@@ -10,7 +10,6 @@
 
 using System.ComponentModel.DataAnnotations;
 using dionizos_backend_app;
-using dionizos_backend_app.Authentication;
 using dionizos_backend_app.Extensions;
 using dionizos_backend_app.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -47,16 +46,9 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="403">invalid session</response>
         [HttpPost]
         [Route("/events")]
-        [ServiceFilter(typeof(ApiKeyAuthFilter))]
-        [SwaggerOperation("AddEvent")]
-        [SwaggerResponse(statusCode: 201, type: typeof(EventDTO), description: "event created")]
-        [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid field")]
-        [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Unauthoraized")]
-        public virtual async Task<IActionResult> AddEvent([FromBody] EventFormDTO body)
+        public virtual async Task<IActionResult > AddEvent([FromHeader][Required()] string sessionToken, [FromBody] EventFormDTO body)
         {
-            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
-            var organizer = _helper.Validate(sessionToken!);
-
+            var organizer = _helper.Validate(sessionToken);
             if (organizer is null) return StatusCode(403);
             if (body.MaxPlace is null || body.StartTime is null || body.EndTime is null)
             {
@@ -109,15 +101,14 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">id not found</response>
         [HttpDelete]
         [Route("/events/{id}")]
-        [ServiceFilter(typeof(ApiKeyAuthFilter))]
-        [SwaggerOperation("CancelEvent")]
-        [SwaggerResponse(statusCode: 204, type: typeof(void), description: "deleted")]
-        [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Unauthorized")]
-        [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not found")]
-        public virtual async Task<IActionResult> CancelEvent([FromRoute][Required] string id)
+        public virtual async Task<IActionResult> CancelEvent([FromHeader][Required()] string sessionToken, [FromRoute][Required] string id)
         {
-            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
-            Organizer organizer = _helper.Validate(sessionToken!)!;
+            Organizer? organizer = _helper.Validate(sessionToken);
+            // check if validated session
+            if (organizer == null)
+            {
+                return StatusCode(403);
+            }
 
             long Id = long.Parse(id);
             Event? @event = organizer.Events.FirstOrDefault(x => x.Id == Id);
@@ -198,15 +189,10 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="403">invalid session</response>
         [HttpGet]
         [Route("/events/my")]
-        [ServiceFilter(typeof(ApiKeyAuthFilter))]
-        [SwaggerOperation("GetMyEvents")]
-        [SwaggerResponse(statusCode: 200, type: typeof(List<EventDTO>), description: "successful operation")]
-        [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Invalid session")]
-        public virtual async Task<IActionResult> GetMyEvents()
+        public virtual async Task<IActionResult> GetMyEvents([FromHeader][Required()]string sessionToken)
         {
-            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
-            var organizer = _helper.Validate(sessionToken!);
 
+            var organizer = _helper.Validate(sessionToken);
             if (organizer is null) return StatusCode(403);
 
             List<EventDTO> events = await _dionizosDataContext.Events.Where(x => x.Owner == organizer.Id)
@@ -226,18 +212,15 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">id not found</response>
         [HttpPatch]
         [Route("/events/{id}")]
-        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [Consumes("application/json")]
         [SwaggerResponse(statusCode: 200, type: typeof(void), description: "No patch needed")]
         [SwaggerResponse(statusCode: 202, type: typeof(void), description: "Pathed")]
         [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Inalid Id of fields")]
         [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Invalid session")]
         [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not found")]
-        public virtual async Task<IActionResult> PatchEvent([FromRoute][Required] string id, [FromBody] EventPatchDTO body)
+        public virtual async Task<IActionResult> PatchEvent([FromHeader][Required()] string sessionToken,[FromRoute][Required] string id, [FromBody] EventPatchDTO body)
         {
-            HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, out var sessionToken);
-            var organizer = _helper.Validate(sessionToken!);
-
+            Organizer? organizer = _helper.Validate(sessionToken);
             // check if validated session
             if(organizer == null)
             {
