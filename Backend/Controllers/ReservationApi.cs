@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -43,6 +44,9 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">token not found</response>
         [HttpDelete]
         [Route("/reservation")]
+        [SwaggerOperation("DeleteReservation")]
+        [SwaggerResponse(statusCode: 204, type: typeof(void), description: "deleted")]
+        [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not Found")]
         public virtual async Task<IActionResult> DeleteReservation([FromHeader][Required()]string reservationToken)
         {
             Reservaton? res = await _dionizosDataContext.Reservatons.FirstOrDefaultAsync(x => x.Token == reservationToken);
@@ -62,12 +66,16 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">event not exist or done</response>
         [HttpPost]
         [Route("/reservation")]
+        [SwaggerOperation("MakeReservation")]
+        [SwaggerResponse(statusCode: 201, type: typeof(ReservationDTO), description: "created")]
+        [SwaggerResponse(statusCode: 400, type: typeof(void), description: "No free place")]
+        [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Event does not exist/ is done")]
         public virtual async Task<IActionResult> MakeReservation([FromHeader][Required()]long? eventId, [FromHeader]long? placeID)
         {
             if (eventId < 1) return StatusCode(404);
             Event? e = await _dionizosDataContext.Events.Include(e => e.Reservatons).FirstOrDefaultAsync(x => x.Id == eventId);
-            if(e is null || e.Status == (int)EventStatus.CancelledEnum || e.Status == (int)EventStatus.DoneEnum) StatusCode(404);
-            if(e.Reservatons.Count() >= e.Placecapacity) StatusCode(400);
+            if(e is null || e.Status == (int)EventStatus.CancelledEnum || e.Status == (int)EventStatus.DoneEnum) return StatusCode(404);
+            if(e.Reservatons.Count >= e.Placecapacity) return StatusCode(400);
             if(placeID is null)
             {
                 var busy = e.Reservatons.Select(x => x.PlaceId).ToList();
@@ -80,13 +88,14 @@ namespace Org.OpenAPITools.Controllers
             }
             else
             {
+                if (placeID < 0 || placeID >= e.Placecapacity) return StatusCode(400);
                 if (e.Reservatons.Any(x => x.PlaceId == placeID)) return StatusCode(400);
             }
             var token = _helper.generateRandomToken(32);
             Reservaton reservaton = new Reservaton()
             {
                 EventId = e.Id,
-                PlaceId = placeID.Value,
+                PlaceId = placeID!.Value,
                 Token = token
             };
             await _dionizosDataContext.Reservatons.AddAsync(reservaton);

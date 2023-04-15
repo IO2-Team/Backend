@@ -6,6 +6,9 @@ using Newtonsoft.Json.Serialization;
 using System;
 using Microsoft.AspNetCore.HttpLogging;
 using Quartz;
+using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Options;
+using System.Reflection;
 
 namespace dionizos_backend_app
 {
@@ -55,6 +58,47 @@ namespace dionizos_backend_app
                 })
                 .AddXmlSerializerFormatters();
 
+            builder.Services
+                .AddSwaggerGen(builder =>
+                {
+                    builder.SwaggerDoc("v1", new OpenApiInfo
+                    {
+                        Version = "v1",
+                        Title = "System rezerwacji miejsc na eventy",
+                        Description = "System rezerwacji miejsc na eventy (ASP.NET Core 3.1)",
+                        Contact = new OpenApiContact()
+                        {
+                            Name = "Swagger Codegen Contributors",
+                            Url = new Uri("https://github.com/swagger-api/swagger-codegen"),
+                            Email = "XXX@pw.edu.pl"
+                        },
+                        TermsOfService = new Uri("http://swagger.io/terms/")
+                    });
+                    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                    builder.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+
+                    builder.AddSecurityDefinition("token", new OpenApiSecurityScheme
+                    {
+                        Type = SecuritySchemeType.ApiKey,
+                        Name = "sessionToken",
+                        In = ParameterLocation.Header
+                    });
+
+                    builder.AddSecurityRequirement(new OpenApiSecurityRequirement {
+                        {
+                            new OpenApiSecurityScheme {
+                                Reference = new OpenApiReference {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "token"
+                                },
+                                Name = "sessionToken",
+                                In = ParameterLocation.Header
+                            },
+                            new List<string>() {}
+                        }
+                    });
+                });
+
             builder.Services.AddCors();
             builder.Services.AddSingleton<IConfigurationRoot>(config);
             builder.Services.AddTransient<IHelper, Helpers>();
@@ -62,8 +106,10 @@ namespace dionizos_backend_app
 
             builder.Services.AddQuartz(q =>
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 q.UseMicrosoftDependencyInjectionScopedJobFactory();
-                // Just use the name of your job that you created in the Jobs folder.
+#pragma warning restore CS0618 // Type or member is obsolete
+                              // Just use the name of your job that you created in the Jobs folder.
                 var jobKey = new JobKey("RefreshEventStatus");
                 q.AddJob<RefreshEventStatus>(opts => opts.WithIdentity(jobKey));
 
@@ -82,7 +128,10 @@ namespace dionizos_backend_app
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(option =>
+                {
+                    option.SwaggerEndpoint("v1/swagger.json", "System rezerwacji miejsc na eventy Original");
+                });
             }
             app.UseHttpLogging();
             app.UseHttpsRedirection();

@@ -5,7 +5,8 @@
         public enum StatusEnum
         {
             PendingEnum = 1,
-            ConfirmedEnum = 2
+            ConfirmedEnum = 2,
+            DeletedEnum = 3
         }
     }
 }

@@ -12,7 +12,6 @@ namespace dionizos_backend_app.Extensions
 
         public static OrganizerDTO AsDto(this Organizer organizer)
         {
-            DionizosDataContext context = new();
             return new OrganizerDTO()
             {
                 Id = organizer.Id,

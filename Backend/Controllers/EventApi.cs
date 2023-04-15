@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -102,16 +103,24 @@ namespace Org.OpenAPITools.Controllers
         [Route("/events/{id}")]
         public virtual async Task<IActionResult> CancelEvent([FromHeader][Required()] string sessionToken, [FromRoute][Required] string id)
         {
-            var organizer = _helper.Validate(sessionToken);
-            if (organizer is null) return StatusCode(403);
-            List<Event> events = await _dionizosDataContext.Events.Where(x => x.Owner == organizer.Id).ToListAsync();
-            if (!events.Exists(x => x.Id == long.Parse(id) && x.Starttime < DateTime.Now))
+            Organizer? organizer = _helper.Validate(sessionToken);
+            // check if validated session
+            if (organizer == null)
             {
-                return StatusCode(404); 
+                return StatusCode(403);
             }
-            var event_selected = events.Where(x => x.Id == long.Parse(id)).First();
-            event_selected.Status = (int)EventStatus.CancelledEnum;
-            return StatusCode(204); 
+
+            long Id = long.Parse(id);
+            Event? @event = organizer.Events.FirstOrDefault(x => x.Id == Id);
+            if(@event == null
+                || @event.Status != (int)EventStatus.InFutureEnum)
+            {
+                return StatusCode(404);
+            }
+
+            @event.Status = (int)EventStatus.CancelledEnum;
+            await _dionizosDataContext.SaveChangesAsync();
+            return StatusCode(204);
         }
 
         /// <summary>
@@ -122,6 +131,9 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="400">Invalid category ID supplied</response>
         [HttpGet]
         [Route("/events/getByCategory")]
+        [SwaggerOperation("GetByCategory")]
+        [SwaggerResponse(statusCode: 200, type: typeof(List<EventDTO>), description: "successful operation")]
+        [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid category ID")]
         public virtual async Task<IActionResult> GetByCategory([FromHeader][Required()] long? categoryId)
         {
             if (categoryId < 1) return StatusCode(400);
@@ -141,6 +153,10 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="404">EventDTO not found</response>
         [HttpGet]
         [Route("/events/{id}")]
+        [SwaggerOperation("GetEventById")]
+        [SwaggerResponse(statusCode: 200, type: typeof(EventWithPlacesDTO), description: "successful operation")]
+        [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Invalid ID supplied")]
+        [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not found")]
         public virtual async Task<IActionResult> GetEventById([FromRoute][Required] long? id)
         {
             if (id < 1) return StatusCode(400);
@@ -157,9 +173,11 @@ namespace Org.OpenAPITools.Controllers
         /// <response code="200">successful operation</response>
         [HttpGet]
         [Route("/events")]
+        [SwaggerOperation("GetEvents")]
+        [SwaggerResponse(statusCode: 200, type: typeof(List<EventDTO>), description: "successful operation")]
         public virtual async Task<IActionResult> GetEvents()
         {
-            List<EventDTO> events = _dionizosDataContext.Events.Select(x => x.AsDto()).ToList();
+            List<EventDTO> events = await _dionizosDataContext.Events.Select(x => x.AsDto()).ToListAsync();
 
             return new ObjectResult(events);
         }
@@ -179,7 +197,7 @@ namespace Org.OpenAPITools.Controllers
 
             List<EventDTO> events = await _dionizosDataContext.Events.Where(x => x.Owner == organizer.Id)
                                                                      .Select(x => x.AsDto()).ToListAsync();
-            return new ObjectResult(events);
+            return StatusCode(200, events);
         }
 
         /// <summary>
@@ -195,7 +213,12 @@ namespace Org.OpenAPITools.Controllers
         [HttpPatch]
         [Route("/events/{id}")]
         [Consumes("application/json")]
-        public virtual async Task<IActionResult> PatchEvent([FromHeader][Required()] string sessionToken, [FromRoute][Required] string id, [FromBody] EventPatchDTO body)
+        [SwaggerResponse(statusCode: 200, type: typeof(void), description: "No patch needed")]
+        [SwaggerResponse(statusCode: 202, type: typeof(void), description: "Pathed")]
+        [SwaggerResponse(statusCode: 400, type: typeof(void), description: "Inalid Id of fields")]
+        [SwaggerResponse(statusCode: 403, type: typeof(void), description: "Invalid session")]
+        [SwaggerResponse(statusCode: 404, type: typeof(void), description: "Not found")]
+        public virtual async Task<IActionResult> PatchEvent([FromHeader][Required()] string sessionToken,[FromRoute][Required] string id, [FromBody] EventPatchDTO body)
         {
             Organizer? organizer = _helper.Validate(sessionToken);
             // check if validated session
@@ -215,26 +238,51 @@ namespace Org.OpenAPITools.Controllers
                 return StatusCode(404);
             }
 
-
-            //TODO: SPRAWDZENIE POPRAWNOSCI POL I ZWROTKA 400
-            //TODO: ZWROTKA 200 jesli nic nie zmienione.
-
             // Update time
             if (!string.IsNullOrEmpty(body.Title)) @event.Title = body.Title;
             if (!string.IsNullOrEmpty(body.Name)) @event.Name = body.Name;
-            if (body.StartTime != null) @event.Starttime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(body.StartTime.Value).DateTime, DateTimeKind.Unspecified);
-            if (body.EndTime != null) @event.Endtime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(body.EndTime.Value).DateTime, DateTimeKind.Unspecified);
+
+            if (body.StartTime != null)
+            {
+                DateTime newStartTime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(body.StartTime.Value).DateTime, DateTimeKind.Unspecified);
+                if(newStartTime < DateTime.Now)
+                {
+                    return StatusCode(400);
+                }
+
+                @event.Starttime = newStartTime;
+            }
+            if (body.EndTime != null)
+            {
+                DateTime newEndTime = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(body.EndTime.Value).DateTime, DateTimeKind.Unspecified);
+                if(newEndTime < @event.Starttime)
+                {
+                    return StatusCode(400);
+                }
+
+                @event.Endtime = newEndTime;
+            }
+
             if(!string.IsNullOrEmpty(body.Latitude)) @event.Latitude = body.Latitude;
             if(!string.IsNullOrEmpty(body.Longitude)) @event.Longitude = body.Longitude;
             if(!string.IsNullOrEmpty(body.PlaceSchema)) @event.Placeschema = body.PlaceSchema;
-            //TODO: nie mo¿e byæ mniej ni¿ by³o - bo mog¹ byæ juz zajête
-            if(body.MaxPlace != null) @event.Placecapacity = (int)body.MaxPlace.Value;
+            if (body.MaxPlace != null)
+            {
+                if(body.MaxPlace >= @event.Placecapacity)
+                {
+                    return StatusCode(400);
+                }
+                @event.Placecapacity = (int)body.MaxPlace.Value;
+            }
 
-            _dionizosDataContext.Update(@event);
+            if (_dionizosDataContext.Entry(@event).State == EntityState.Unchanged)
+            {
+                return StatusCode(200);
+            }
+
             await _dionizosDataContext.SaveChangesAsync();
 
-            EventDTO dto = @event.AsDto();
-            return StatusCode(202, dto);
+            return StatusCode(202);
         }
     }
 }

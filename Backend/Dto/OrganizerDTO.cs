@@ -61,7 +61,12 @@ namespace Org.OpenAPITools.Models
             /// Enum ConfirmedEnum for confirmed
             /// </summary>
             [EnumMember(Value = "confirmed")]
-            ConfirmedEnum = 1
+            ConfirmedEnum = 1,
+            /// <summary>
+            /// Enum DeletedEnum for deleted
+            /// </summary>
+            [EnumMember(Value = "deleted")]
+            DeletedEnum = 2
         }
 
         /// <summary>
