@@ -65,7 +65,7 @@ namespace dionizos_backend_app
                     {
                         Version = "v1",
                         Title = "System rezerwacji miejsc na eventy",
-                        Description = "System rezerwacji miejsc na eventy (ASP.NET Core 3.1)",
+                        Description = "System rezerwacji miejsc na eventy (ASP.NET Core 6.0)",
                         Contact = new OpenApiContact()
                         {
                             Name = "Swagger Codegen Contributors",
@@ -76,27 +76,6 @@ namespace dionizos_backend_app
                     });
                     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                     builder.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-
-                    builder.AddSecurityDefinition("token", new OpenApiSecurityScheme
-                    {
-                        Type = SecuritySchemeType.ApiKey,
-                        Name = "sessionToken",
-                        In = ParameterLocation.Header
-                    });
-
-                    builder.AddSecurityRequirement(new OpenApiSecurityRequirement {
-                        {
-                            new OpenApiSecurityScheme {
-                                Reference = new OpenApiReference {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "token"
-                                },
-                                Name = "sessionToken",
-                                In = ParameterLocation.Header
-                            },
-                            new List<string>() {}
-                        }
-                    });
                 });
 
             builder.Services.AddCors();

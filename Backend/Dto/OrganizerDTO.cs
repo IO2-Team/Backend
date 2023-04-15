@@ -56,17 +56,17 @@ namespace Org.OpenAPITools.Models
             /// Enum PendingEnum for pending
             /// </summary>
             [EnumMember(Value = "pending")]
-            PendingEnum = 0,
+            PendingEnum = 1,
             /// <summary>
             /// Enum ConfirmedEnum for confirmed
             /// </summary>
             [EnumMember(Value = "confirmed")]
-            ConfirmedEnum = 1,
+            ConfirmedEnum = 2,
             /// <summary>
             /// Enum DeletedEnum for deleted
             /// </summary>
             [EnumMember(Value = "deleted")]
-            DeletedEnum = 2
+            DeletedEnum = 3
         }
 
         /// <summary>

@@ -50,7 +50,7 @@ namespace Org.OpenAPITools.Controllers
         public virtual async Task<IActionResult> DeleteReservation([FromHeader][Required()]string reservationToken)
         {
             Reservaton? res = await _dionizosDataContext.Reservatons.FirstOrDefaultAsync(x => x.Token == reservationToken);
-            if(res is null) StatusCode(404);
+            if(res is null) return StatusCode(404);
             _dionizosDataContext.Reservatons.Remove(res!);
             await _dionizosDataContext.SaveChangesAsync();
             return StatusCode(204);

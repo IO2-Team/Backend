@@ -226,7 +226,13 @@ namespace Org.OpenAPITools.Controllers
             if(!string.IsNullOrEmpty(body.Name)) organizer.Name = body.Name;
             if (!string.IsNullOrEmpty(body.Password)) organizer.Password = Extensions.EncryptPass(body.Password);
 
+            if (_context.Entry(organizer).State == EntityState.Unchanged)
+            {
+                return StatusCode(200);
+            }
+
             await _context.SaveChangesAsync();
+
             return StatusCode(202);
         }
 
