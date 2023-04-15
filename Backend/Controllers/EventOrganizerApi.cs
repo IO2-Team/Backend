@@ -33,7 +33,7 @@ namespace Org.OpenAPITools.Controllers
         private readonly ILogger _logger;
         private readonly Random _random = new();
 
-        public EventOrganizerApiController(DionizosDataContext context, IHelper helper, IMailing mailing, ILogger logger)
+        public EventOrganizerApiController(DionizosDataContext context, IHelper helper, IMailing mailing, ILogger<EventOrganizerApiController> logger)
         {
             _context = context;
             _helper = helper;
