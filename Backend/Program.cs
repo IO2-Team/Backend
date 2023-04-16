@@ -40,7 +40,7 @@ namespace dionizos_backend_app
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddDbContext<DionizosDataContext>(options => options.UseNpgsql());
+            builder.Services.AddDbContext<DionizosDataContext>(/*options => options.UseNpgsql()*/);
             //Environment.GetEnvironmentVariable("POSTGRES_CONNSTRING"))
 
             builder.Services
