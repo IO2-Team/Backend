@@ -89,7 +89,7 @@ namespace Org.OpenAPITools.Controllers
             await _context.SaveChangesAsync();
 
             OrganizerDTO dto = organizer.AsDto();
-            return StatusCode(201, dto);
+            return StatusCode(202, dto);
         }
 
         /// <summary>
@@ -189,7 +189,8 @@ namespace Org.OpenAPITools.Controllers
             await _context.SaveChangesAsync();
 
             SessionResponseDTO dto = session.AsDto();
-            return StatusCode(200, dto);
+            //return StatusCode(200, dto);
+            return new ObjectResult(dto) { StatusCode = 200 };
         }
 
         /// <summary>
