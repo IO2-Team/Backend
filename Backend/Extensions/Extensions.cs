@@ -21,9 +21,9 @@ namespace dionizos_backend_app.Extensions
             };
         }
 
-        public static EventDTO AsDto(this Event ev)
+        public static EventDTO AsDto(this Event ev, DionizosDataContext context)
         {
-            DionizosDataContext context = new();
+            //DionizosDataContext context = new();
             var busyPlaces = context.Reservatons.Where(r => r.EventId == ev.Id).Select(r => r.PlaceId).ToArray();
             return new EventDTO()
             {
@@ -46,9 +46,9 @@ namespace dionizos_backend_app.Extensions
             };
         }
 
-        public static EventWithPlacesDTO AsDtoWithPlace(this Event ev)
+        public static EventWithPlacesDTO AsDtoWithPlace(this Event ev, DionizosDataContext context)
         {
-            DionizosDataContext context = new();
+            //DionizosDataContext context = new();
             var busyPlaces = context.Reservatons.Where(r => r.EventId == ev.Id).Select(r => r.PlaceId).ToArray();
             return new EventWithPlacesDTO()
             {
