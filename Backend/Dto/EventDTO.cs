@@ -111,13 +111,6 @@ namespace Org.OpenAPITools.Models
         public long? MaxPlace { get; set; }
 
         /// <summary>
-        /// Gets or Sets PlaceSchema
-        /// </summary>
-
-        [DataMember(Name = "placeSchema")]
-        public string PlaceSchema { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -136,7 +129,6 @@ namespace Org.OpenAPITools.Models
             sb.Append("  Categories: ").Append(Categories).Append("\n");
             sb.Append("  FreePlace: ").Append(FreePlace).Append("\n");
             sb.Append("  MaxPlace: ").Append(MaxPlace).Append("\n");
-            sb.Append("  PlaceSchema: ").Append(PlaceSchema).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -232,11 +224,6 @@ namespace Org.OpenAPITools.Models
                     MaxPlace == other.MaxPlace ||
                     MaxPlace != null &&
                     MaxPlace.Equals(other.MaxPlace)
-                ) &&
-                (
-                    PlaceSchema == other.PlaceSchema ||
-                    PlaceSchema != null &&
-                    PlaceSchema.Equals(other.PlaceSchema)
                 );
 #pragma warning restore CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
         }
@@ -275,8 +262,6 @@ namespace Org.OpenAPITools.Models
                     hashCode = hashCode * 59 + FreePlace.GetHashCode();
                 if (MaxPlace != null)
                     hashCode = hashCode * 59 + MaxPlace.GetHashCode();
-                if (PlaceSchema != null)
-                    hashCode = hashCode * 59 + PlaceSchema.GetHashCode();
                 return hashCode;
             }
         }
