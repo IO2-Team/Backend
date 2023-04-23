@@ -89,7 +89,7 @@ namespace Org.OpenAPITools.Controllers
             await _context.SaveChangesAsync();
 
             OrganizerDTO dto = organizer.AsDto();
-            return StatusCode(201, dto);
+            return StatusCode(202, dto);
         }
 
         /// <summary>
