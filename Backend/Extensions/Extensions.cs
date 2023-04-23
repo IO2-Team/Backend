@@ -33,7 +33,6 @@ namespace dionizos_backend_app.Extensions
                 StartTime = ((DateTimeOffset)DateTime.SpecifyKind(ev.Starttime, DateTimeKind.Utc)).ToUnixTimeSeconds(),
                 EndTime = ((DateTimeOffset)DateTime.SpecifyKind(ev.Endtime, DateTimeKind.Utc)).ToUnixTimeSeconds(),
                 Name = ev.Name ?? "unknown",
-                PlaceSchema = ev.Placeschema ?? "",
                 Status = (EventStatus)ev.Status,
                 Categories = context.Eventincategories
                                     .Include(x => x.Categories)
