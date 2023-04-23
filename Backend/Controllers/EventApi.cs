@@ -263,6 +263,29 @@ namespace Org.OpenAPITools.Controllers
                 @event.Endtime = newEndTime;
             }
 
+            if (body.CategoriesIds != null)
+            {
+                var bodySet = new  HashSet<long>(body.CategoriesIds.Where(x => x is not null).ToList().ConvertAll(x => (long)x));
+                
+                var dbObjSArr = await _dionizosDataContext.Eventincategories
+                    .Where(x => x.EventId == @event.Id).ToArrayAsync();
+                var dbSet = new HashSet<long>( dbObjSArr.Select(x => x.CategoriesId).ToList());
+                if (!bodySet.SetEquals(dbSet))
+                {
+                    _dionizosDataContext.Entry(@event).State = EntityState.Modified;
+                    var cats = new List<Eventincategory>(bodySet.Count);
+                    foreach (int catId in bodySet)
+                    {
+                        var ev = new Eventincategory();
+                        ev.CategoriesId = catId;
+                        ev.EventId = @event.Id;
+                        cats.Add(ev);
+                    }
+                    _dionizosDataContext.Eventincategories.RemoveRange(dbObjSArr);
+                    _dionizosDataContext.Eventincategories.AddRange(cats);
+                }
+            }
+
             if(!string.IsNullOrEmpty(body.Latitude)) @event.Latitude = body.Latitude;
             if(!string.IsNullOrEmpty(body.Longitude)) @event.Longitude = body.Longitude;
             if(!string.IsNullOrEmpty(body.PlaceSchema)) @event.Placeschema = body.PlaceSchema;
