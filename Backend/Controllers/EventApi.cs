@@ -195,8 +195,8 @@ namespace Org.OpenAPITools.Controllers
             var organizer = _helper.Validate(sessionToken);
             if (organizer is null) return StatusCode(403);
 
-            List<EventDTO> events = await _dionizosDataContext.Events.Where(x => x.Owner == organizer.Id)
-                                                                     .Select(x => x.AsDto(_dionizosDataContext)).ToListAsync();
+            List<Event> eventsDb = await _dionizosDataContext.Events.Where(x => x.Owner == organizer.Id).ToListAsync();
+            List<EventDTO> events = eventsDb.Select(x => x.AsDto(_dionizosDataContext)).ToList();
             return StatusCode(200, events);
         }
 
