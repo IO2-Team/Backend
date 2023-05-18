@@ -9,6 +9,7 @@ using Quartz;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
 using System.Reflection;
+using Path = System.IO.Path;
 
 namespace dionizos_backend_app
 {

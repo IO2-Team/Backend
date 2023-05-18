@@ -31,5 +31,7 @@ public partial class Event
 
     public virtual Organizer OwnerNavigation { get; set; } = null!;
 
+    public virtual ICollection<Path> Paths { get; } = new List<Path>();
+
     public virtual ICollection<Reservaton> Reservatons { get; } = new List<Reservaton>();
 }

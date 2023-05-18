@@ -25,6 +25,8 @@ public partial class DionizosDataContext : DbContext
 
     public virtual DbSet<Organizer> Organizers { get; set; }
 
+    public virtual DbSet<Path> Paths { get; set; }
+
     public virtual DbSet<Reservaton> Reservatons { get; set; }
 
     public virtual DbSet<Session> Sessions { get; set; }
@@ -147,6 +149,24 @@ public partial class DionizosDataContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.Password).HasColumnName("password");
             entity.Property(e => e.Status).HasColumnName("status");
+        });
+
+        modelBuilder.Entity<Path>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("paths_pk");
+
+            entity.ToTable("paths");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EventId).HasColumnName("event_id");
+            entity.Property(e => e.PathStr)
+                .HasColumnType("character varying")
+                .HasColumnName("path_str");
+
+            entity.HasOne(d => d.Event).WithMany(p => p.Paths)
+                .HasForeignKey(d => d.EventId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("paths_event");
         });
 
         modelBuilder.Entity<Reservaton>(entity =>

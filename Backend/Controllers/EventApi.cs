@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Org.OpenAPITools.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using Path = dionizos_backend_app.Models.Path;
 
 namespace Org.OpenAPITools.Controllers
 {
@@ -306,6 +307,107 @@ namespace Org.OpenAPITools.Controllers
             await _dionizosDataContext.SaveChangesAsync();
 
             return StatusCode(202);
+        }
+
+        /// <summary>
+        /// delete photo from db
+        /// </summary>
+        /// <param name="id">id of Event</param>
+        /// <param name="path">path of photo</param>
+        /// <response code="204">deleted</response>
+        /// <response code="403">invalid session</response>
+        /// <response code="404">id or path not found</response>
+        [HttpDelete]
+        [Route("/events/{id}/photos")]
+        [SwaggerOperation("DeletePhoto")]
+        public virtual async Task<IActionResult> DeletePhoto([FromHeader][Required()] string sessionToken, [FromRoute][Required]long id, [FromHeader][Required()]string path)
+        { 
+            Organizer? organizer = _helper.Validate(sessionToken);
+            // check if validated session
+            if(organizer == null)
+            {
+                return StatusCode(403);
+            }
+
+            if (organizer.Events.Count(x => x.Id == id) == 0)
+            {
+                return StatusCode(404);
+            }
+
+            var pathQuery = _dionizosDataContext.Paths.Where(x => x.EventId==id && x.PathStr==path);
+            if (pathQuery.Count() == 0)
+            {
+                return StatusCode(404);
+            }
+
+            _dionizosDataContext.Paths.RemoveRange(pathQuery);
+            await _dionizosDataContext.SaveChangesAsync();
+            return StatusCode(204);
+        }
+
+        /// <summary>
+        /// get list of photo paths for id
+        /// </summary>
+        /// <remarks>Returns a list of photo paths</remarks>
+        /// <param name="id">ID of event to return</param>
+        /// <response code="200">successful operation</response>
+        /// <response code="400">Invalid ID supplied</response>
+        /// <response code="404">Event not found</response>
+        [HttpGet]
+        [Route("/events/{id}/photos")]
+        [SwaggerOperation("GetPhoto")]
+        [SwaggerResponse(statusCode: 200, type: typeof(List<string>), description: "successful operation")]
+        public virtual async Task<IActionResult> GetPhoto([FromRoute][Required]long? id)
+        {
+            if(id < 0)
+            {
+                return StatusCode(400);
+            }
+            if(!await _dionizosDataContext.Events.AnyAsync(predicate => predicate.Id == id))
+            {
+                return StatusCode(404);
+            }
+            var eventPhotos = await _dionizosDataContext.Paths.Where(x => x.EventId == id).ToListAsync();
+            return StatusCode(200, eventPhotos.Select(x => x.PathStr).ToList());
+        }
+
+        /// <summary>
+        /// add photo to id
+        /// </summary>
+        /// <param name="id">id of Event</param>
+        /// <param name="path">path of photo</param>
+        /// <response code="200">path added</response>
+        /// <response code="400">path already exist</response>
+        /// <response code="403">invalid session</response>
+        /// <response code="404">id not found</response>
+        [HttpPost]
+        [Route("/events/{id}/photos")]
+        [SwaggerOperation("PutPhoto")]
+        public virtual async Task<IActionResult> PutPhoto([FromHeader][Required()] string sessionToken, [FromRoute][Required]long id, [FromHeader][Required()]string path)
+        { 
+            Organizer? organizer = _helper.Validate(sessionToken);
+            // check if validated session
+            if(organizer == null)
+            {
+                return StatusCode(403);
+            }
+            if (organizer.Events.Count(x => x.Id == id) == 0)
+            {
+                return StatusCode(404);
+            }
+
+            var pathQuery = _dionizosDataContext.Paths.Where(x => x.EventId==id && x.PathStr==path);
+            if (pathQuery.Any())
+            {
+                return StatusCode(400);
+            }
+
+            var p = new Path();
+            p.EventId = id;
+            p.PathStr = path;
+            _dionizosDataContext.Paths.AddAsync(p);
+            await _dionizosDataContext.SaveChangesAsync();
+            return StatusCode(204);
         }
     }
 }
