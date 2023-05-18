@@ -1,4 +1,5 @@
 DELETE FROM EventInCategories;
+DELETE FROM Paths;
 DELETE FROM Categories;
 DELETE FROM Reservatons;
 DELETE FROM Sessions;
@@ -6,7 +7,7 @@ DELETE FROM EmailCodes;
 DELETE FROM Events;
 DELETE FROM Organizers;
 
-
+DROP TABLE Paths;
 DROP TABLE EmailCodes;
 DROP TABLE Sessions;
 DROP TABLE Reservatons;
