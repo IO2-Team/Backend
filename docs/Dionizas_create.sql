@@ -71,7 +71,7 @@ CREATE TABLE Sessions (
 CREATE TABLE Paths (
     id bigserial NOT NULL,
     event_id bigint  NOT NULL,
-    path_str varchar NOT NULL,
+    path_str text NOT NULL,
     CONSTRAINT Paths_pk PRIMARY KEY(id)
 );
 
