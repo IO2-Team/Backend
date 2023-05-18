@@ -68,6 +68,13 @@ CREATE TABLE Sessions (
     CONSTRAINT Sessions_pk PRIMARY KEY (id)
 );
 
+CREATE TABLE Paths (
+    id bigserial NOT NULL,
+    event_id bigint  NOT NULL,
+    path_str text NOT NULL,
+    CONSTRAINT Paths_pk PRIMARY KEY(id)
+);
+
 -- foreign keys
 -- Reference: EmailCodes_Organizers (table: EmailCodes)
 ALTER TABLE EmailCodes ADD CONSTRAINT EmailCodes_Organizers
@@ -117,5 +124,11 @@ ALTER TABLE EventInCategories ADD CONSTRAINT eventInCategories_Event
     INITIALLY IMMEDIATE
 ;
 
--- End of file.
+ALTER TABLE Paths ADD CONSTRAINT Paths_Event
+    FOREIGN KEY (event_id)
+    REFERENCES Events (id)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
 
+-- End of file.
