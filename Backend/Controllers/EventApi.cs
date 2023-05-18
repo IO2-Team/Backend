@@ -320,7 +320,7 @@ namespace Org.OpenAPITools.Controllers
         [HttpDelete]
         [Route("/events/{id}/photos")]
         [SwaggerOperation("DeletePhoto")]
-        public virtual IActionResult DeletePhoto([FromHeader][Required()] string sessionToken, [FromRoute][Required]long id, [FromHeader][Required()]string path)
+        public virtual async Task<IActionResult> DeletePhoto([FromHeader][Required()] string sessionToken, [FromRoute][Required]long id, [FromHeader][Required()]string path)
         { 
             Organizer? organizer = _helper.Validate(sessionToken);
             // check if validated session
@@ -340,8 +340,8 @@ namespace Org.OpenAPITools.Controllers
                 return StatusCode(404);
             }
 
-            _dionizosDataContext.Paths.Remove(pathQuery.First());
-            _dionizosDataContext.SaveChanges();
+            _dionizosDataContext.Paths.RemoveRange(pathQuery);
+            await _dionizosDataContext.SaveChangesAsync();
             return StatusCode(204);
         }
 
@@ -357,12 +357,18 @@ namespace Org.OpenAPITools.Controllers
         [Route("/events/{id}/photos")]
         [SwaggerOperation("GetPhoto")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<string>), description: "successful operation")]
-        public virtual IActionResult GetPhoto([FromRoute][Required]long? id)
+        public virtual async Task<IActionResult> GetPhoto([FromRoute][Required]long? id)
         {
-
-            var eventPhotos = _dionizosDataContext.Paths.Where(x => x.EventId == id).ToList();
-            if (eventPhotos.Count == 0) return StatusCode(404);
-            return StatusCode(200, eventPhotos);
+            if(id < 0)
+            {
+                return StatusCode(400);
+            }
+            if(!await _dionizosDataContext.Events.AnyAsync(predicate => predicate.Id == id))
+            {
+                return StatusCode(404);
+            }
+            var eventPhotos = await _dionizosDataContext.Paths.Where(x => x.EventId == id).ToListAsync();
+            return StatusCode(200, eventPhotos.Select(x => x.PathStr).ToList());
         }
 
         /// <summary>
@@ -377,7 +383,7 @@ namespace Org.OpenAPITools.Controllers
         [HttpPost]
         [Route("/events/{id}/photos")]
         [SwaggerOperation("PutPhoto")]
-        public virtual IActionResult PutPhoto([FromHeader][Required()] string sessionToken, [FromRoute][Required]long id, [FromHeader][Required()]string path)
+        public virtual async Task<IActionResult> PutPhoto([FromHeader][Required()] string sessionToken, [FromRoute][Required]long id, [FromHeader][Required()]string path)
         { 
             Organizer? organizer = _helper.Validate(sessionToken);
             // check if validated session
@@ -399,8 +405,8 @@ namespace Org.OpenAPITools.Controllers
             var p = new Path();
             p.EventId = id;
             p.PathStr = path;
-            _dionizosDataContext.Paths.Add(p);
-            _dionizosDataContext.SaveChanges();
+            _dionizosDataContext.Paths.AddAsync(p);
+            await _dionizosDataContext.SaveChangesAsync();
             return StatusCode(204);
         }
     }
